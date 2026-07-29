@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wbs-admin-pwa-v9';
+const CACHE_NAME = 'wbs-admin-pwa-v10';
 const ADMIN_ASSETS = [
   './admin.html',
   './admin.webmanifest',
