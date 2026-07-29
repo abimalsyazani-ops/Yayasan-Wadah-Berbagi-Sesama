@@ -56,12 +56,14 @@
   const supabaseConfig={url:'https://tnwnmotbjhdefkzsdpuj.supabase.co',key:'sb_publishable_i3e7OtL5w0cMANlQJ1xSXw_jG6laci0',tables:Object.keys(keys)};
   const notifySync=type=>window.dispatchEvent(new CustomEvent('wbs:data-sync',{detail:{type}}));
   class SupabaseRestSync{
-    constructor(config){this.url=config.url.replace(/\/$/,'');this.key=config.key;this.tables=config.tables;this.enabled=Boolean(this.url&&this.key)}
-    headers(extra={}){return{apikey:this.key,Authorization:'Bearer '+this.key,'Content-Type':'application/json',...extra}}
+    constructor(config){this.url=config.url.replace(/\/$/,'');this.key=config.key;this.accessToken='';this.tables=config.tables;this.enabled=Boolean(this.url&&this.key)}
+    setAccessToken(token){this.accessToken=token||''}
+    headers(extra={}){return{apikey:this.key,Authorization:'Bearer '+(this.accessToken||this.key),'Content-Type':'application/json',...extra}}
     endpoint(type,query=''){return this.url+'/rest/v1/'+type+query}
+    canWrite(type){return Boolean(this.accessToken)||['donors','volunteers','messages'].includes(type)}
     async list(type){if(!this.enabled||!this.tables.includes(type))return[];const response=await fetch(this.endpoint(type,'?select=*&order=createdAt.desc.nullslast'),{headers:this.headers()});if(!response.ok)throw new Error('Supabase list '+type+' failed: '+response.status);return response.json()}
-    async upsert(type,item){if(!this.enabled||!this.tables.includes(type))return null;const response=await fetch(this.endpoint(type),{method:'POST',headers:this.headers({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(item)});if(!response.ok)throw new Error('Supabase save '+type+' failed: '+response.status);return true}
-    async remove(type,id){if(!this.enabled||!this.tables.includes(type))return null;const response=await fetch(this.endpoint(type,'?id=eq.'+encodeURIComponent(id)),{method:'DELETE',headers:this.headers({Prefer:'return=minimal'})});if(!response.ok)throw new Error('Supabase delete '+type+' failed: '+response.status);return true}
+    async upsert(type,item){if(!this.enabled||!this.tables.includes(type)||!this.canWrite(type))return null;const response=await fetch(this.endpoint(type),{method:'POST',headers:this.headers({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(item)});if(!response.ok)throw new Error('Supabase save '+type+' failed: '+response.status);return true}
+    async remove(type,id){if(!this.enabled||!this.tables.includes(type)||!this.accessToken)return null;const response=await fetch(this.endpoint(type,'?id=eq.'+encodeURIComponent(id)),{method:'DELETE',headers:this.headers({Prefer:'return=minimal'})});if(!response.ok)throw new Error('Supabase delete '+type+' failed: '+response.status);return true}
     async hydrate(keys){const results=await Promise.allSettled(this.tables.map(async type=>{const rows=await this.list(type);if(Array.isArray(rows)){localStorage.setItem(keys[type],JSON.stringify(rows));notifySync(type)}}));return results}
   }
   const supabaseSync=new SupabaseRestSync(supabaseConfig);
@@ -74,7 +76,7 @@
   }
   class SupabaseRepository{
     constructor(client){this.client=client}
-    async list(type){const{data,error}=await this.client.from(type).select('*').order('created_at',{ascending:false});if(error)throw error;return data}
+    async list(type){const{data,error}=await this.client.from(type).select('*').order('createdAt',{ascending:false});if(error)throw error;return data}
     async save(type,item){const{data,error}=await this.client.from(type).upsert(item).select().single();if(error)throw error;return data}
     async remove(type,id){const{error}=await this.client.from(type).delete().eq('id',id);if(error)throw error}
     async find(type,id){const{data,error}=await this.client.from(type).select('*').eq('id',id).single();if(error)throw error;return data}
