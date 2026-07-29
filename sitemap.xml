@@ -15,6 +15,7 @@
   <url><loc>http://127.0.0.1:8765/relawan.html</loc></url>
   <url><loc>http://127.0.0.1:8765/transparansi.html</loc></url>
   <url><loc>http://127.0.0.1:8765/galeri.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/gallery-detail.html</loc></url>
   <url><loc>http://127.0.0.1:8765/donasi-buku.html</loc></url>
   <url><loc>http://127.0.0.1:8765/kontak.html</loc></url>
 </urlset>
