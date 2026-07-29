@@ -52,26 +52,40 @@
     volunteers:[],donors:[],messages:[]
   };
 
-  const keys={programs:'wbs_programs_v2',campaigns:'wbs_campaigns_v2',articles:'wbs_articles_v2',documents:'wbs_documents_v2',gallery:'wbs_gallery_v2',videos:'wbs_videos_v2',volunteers:'wbs_volunteers_v2',donors:'wbs_donors_v2',messages:'wbs_messages_v2'};
-  const supabaseConfig={url:'https://tnwnmotbjhdefkzsdpuj.supabase.co',key:'sb_publishable_i3e7OtL5w0cMANlQJ1xSXw_jG6laci0',tables:Object.keys(keys)};
+  // Mode demo aman untuk uji tampilan/fungsi lokal, tetapi bukan bukti keamanan produksi.
+  // Ganti ke "production" setelah Supabase Auth, Database, Storage, dan RLS sudah dikonfigurasi.
+  const APP_MODE='demo';
+  const keys={programs:'wbs_programs_v2',campaigns:'wbs_campaigns_v2',articles:'wbs_articles_v2',documents:'wbs_documents_v2',gallery:'wbs_gallery_v2',videos:'wbs_videos_v2',volunteers:'wbs_volunteers_v2',donors:'wbs_donors_v2',messages:'wbs_messages_v2',audit_logs:'wbs_audit_logs_v2'};
+  const syncTables=['programs','campaigns','articles','documents','gallery','videos','volunteers','donors','messages'];
+  const supabaseConfig={url:'https://tnwnmotbjhdefkzsdpuj.supabase.co',key:'sb_publishable_i3e7OtL5w0cMANlQJ1xSXw_jG6laci0',tables:syncTables};
   const notifySync=type=>window.dispatchEvent(new CustomEvent('wbs:data-sync',{detail:{type}}));
+  const safeParse=(value,fallback=[])=>{try{const parsed=JSON.parse(value);return Array.isArray(parsed)?parsed:fallback}catch{return fallback}};
+  const normalizeType=type=>{if(!Object.prototype.hasOwnProperty.call(keys,type))throw new Error('Jenis data tidak dikenali.');return type};
+  const writeRows=(type,rows)=>{try{localStorage.setItem(keys[type],JSON.stringify(rows))}catch(error){throw new Error('Penyimpanan browser penuh atau tidak dapat diakses. Hapus data yang tidak perlu lalu coba lagi.')}};
+  const recordAudit=(action,type,before,after)=>{
+    try{
+      const rows=safeParse(localStorage.getItem(keys.audit_logs),[]);
+      rows.unshift({id:'AUD-'+Date.now()+'-'+Math.random().toString(16).slice(2,8),action,type,recordId:(after||before||{}).id||'',before:before||null,after:after||null,user:'local-demo',createdAt:new Date().toISOString(),userAgent:navigator.userAgent});
+      localStorage.setItem(keys.audit_logs,JSON.stringify(rows.slice(0,500)));
+    }catch(error){console.warn('Audit log gagal disimpan:',error.message)}
+  };
   class SupabaseRestSync{
     constructor(config){this.url=config.url.replace(/\/$/,'');this.key=config.key;this.accessToken='';this.tables=config.tables;this.enabled=Boolean(this.url&&this.key)}
     setAccessToken(token){this.accessToken=token||''}
     headers(extra={}){return{apikey:this.key,Authorization:'Bearer '+(this.accessToken||this.key),'Content-Type':'application/json',...extra}}
     endpoint(type,query=''){return this.url+'/rest/v1/'+type+query}
     canWrite(type){return Boolean(this.accessToken)||['donors','volunteers','messages'].includes(type)}
-    async list(type){if(!this.enabled||!this.tables.includes(type))return[];const response=await fetch(this.endpoint(type,'?select=*&order=createdAt.desc.nullslast'),{headers:this.headers()});if(!response.ok)throw new Error('Supabase list '+type+' failed: '+response.status);return response.json()}
-    async upsert(type,item){if(!this.enabled||!this.tables.includes(type)||!this.canWrite(type))return null;const response=await fetch(this.endpoint(type),{method:'POST',headers:this.headers({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(item)});if(!response.ok)throw new Error('Supabase save '+type+' failed: '+response.status);return true}
+    async list(type){if(APP_MODE!=='production'||!this.enabled||!this.tables.includes(type))return[];const response=await fetch(this.endpoint(type,'?select=*&order=createdAt.desc.nullslast'),{headers:this.headers()});if(!response.ok)throw new Error('Supabase list '+type+' failed: '+response.status);return response.json()}
+    async upsert(type,item){if(APP_MODE!=='production'||!this.enabled||!this.tables.includes(type)||!this.canWrite(type))return null;const response=await fetch(this.endpoint(type,'?on_conflict=id'),{method:'POST',headers:this.headers({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(item)});if(!response.ok)throw new Error('Supabase save '+type+' failed: '+response.status);return true}
     async remove(type,id){if(!this.enabled||!this.tables.includes(type)||!this.accessToken)return null;const response=await fetch(this.endpoint(type,'?id=eq.'+encodeURIComponent(id)),{method:'DELETE',headers:this.headers({Prefer:'return=minimal'})});if(!response.ok)throw new Error('Supabase delete '+type+' failed: '+response.status);return true}
     async hydrate(keys){const results=await Promise.allSettled(this.tables.map(async type=>{const rows=await this.list(type);if(Array.isArray(rows)){localStorage.setItem(keys[type],JSON.stringify(rows));notifySync(type)}}));return results}
   }
   const supabaseSync=new SupabaseRestSync(supabaseConfig);
   class LocalRepository{
-    list(type){const custom=this.custom(type);const base=seed[type]||[];return [...custom,...base.filter(item=>!custom.some(entry=>entry.id===item.id))]}
-    custom(type){try{return JSON.parse(localStorage.getItem(keys[type])||'[]')}catch{return[]}}
-    save(type,item){const rows=this.custom(type);const index=rows.findIndex(row=>row.id===item.id);if(index>=0)rows[index]=item;else rows.unshift(item);localStorage.setItem(keys[type],JSON.stringify(rows));supabaseSync.upsert(type,item).catch(error=>console.warn(error.message));return item}
-    remove(type,id){localStorage.setItem(keys[type],JSON.stringify(this.custom(type).filter(item=>item.id!==id)));supabaseSync.remove(type,id).catch(error=>console.warn(error.message))}
+    list(type){normalizeType(type);const custom=this.custom(type);const base=seed[type]||[];return [...custom,...base.filter(item=>!custom.some(entry=>entry.id===item.id))]}
+    custom(type){normalizeType(type);return safeParse(localStorage.getItem(keys[type])||'[]',[])}
+    save(type,item){normalizeType(type);if(!item||typeof item!=='object')throw new Error('Data tidak valid.');const now=new Date().toISOString(),rows=this.custom(type),index=rows.findIndex(row=>row.id===item.id),before=index>=0?{...rows[index]}:null,saved={...item,id:item.id||WBS.uid(type.slice(0,3).toUpperCase()),createdAt:item.createdAt||before?.createdAt||now,updatedAt:now};if(index>=0)rows[index]=saved;else rows.unshift(saved);writeRows(type,rows);recordAudit(before?'update':'create',type,before,saved);supabaseSync.upsert(type,saved).catch(error=>console.warn(error.message));notifySync(type);return saved}
+    remove(type,id){normalizeType(type);const rows=this.custom(type),before=rows.find(item=>item.id===id);writeRows(type,rows.filter(item=>item.id!==id));recordAudit('delete',type,before,null);supabaseSync.remove(type,id).catch(error=>console.warn(error.message));notifySync(type)}
     find(type,id){return this.list(type).find(item=>item.id===id)}
   }
   class SupabaseRepository{
@@ -81,5 +95,5 @@
     async remove(type,id){const{error}=await this.client.from(type).delete().eq('id',id);if(error)throw error}
     async find(type,id){const{data,error}=await this.client.from(type).select('*').eq('id',id).single();if(error)throw error;return data}
   }
-  window.WBS={seed,keys,supabaseConfig,supabaseSync,hydrateFromSupabase(){return supabaseSync.hydrate(keys)},repository:new LocalRepository(),LocalRepository,SupabaseRepository,uid(prefix){return prefix+'-'+Date.now()+'-'+Math.random().toString(16).slice(2,8)}};
+  window.WBS={APP_MODE,seed,keys,supabaseConfig,supabaseSync,audit:recordAudit,hydrateFromSupabase(){return APP_MODE==='production'?supabaseSync.hydrate(keys):Promise.resolve([])},repository:new LocalRepository(),LocalRepository,SupabaseRepository,uid(prefix){return prefix+'-'+Date.now()+'-'+Math.random().toString(16).slice(2,8)}};
 })();

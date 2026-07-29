@@ -39,6 +39,8 @@ http
 
       res.writeHead(200, {
         "Content-Type": types[path.extname(filePath).toLowerCase()] || "application/octet-stream",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
       });
       res.end(data);
     });
