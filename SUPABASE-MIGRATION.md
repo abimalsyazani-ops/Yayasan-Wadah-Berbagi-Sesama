@@ -1,15 +1,44 @@
-# Persiapan Migrasi Supabase
+# Migrasi Supabase WBS
 
-Website menggunakan pola repository pada `assets/data-store.js`. Saat ini `WBS.repository` memakai `LocalRepository`. Untuk produksi, buat Supabase client lalu ganti dengan `new WBS.SupabaseRepository(client)`.
+Website sudah disiapkan untuk membaca dan menyimpan data ke Supabase project:
 
-## Tabel
+- URL: `https://tnwnmotbjhdefkzsdpuj.supabase.co`
+- Publishable key: sudah dipasang di `assets/data-store.js`
+- SQL migrasi: `supabase/wbs_supabase_migration.sql`
 
-- `articles`: `id`, `title`, `category`, `date`, `excerpt`, `content`, `image`, `created_at`
-- `campaigns`: `id`, `title`, `category`, `description`, `collected`, `target`, `deadline`, `image`, `created_at`
-- `documents`: `id`, `title`, `category`, `period`, `file_name`, `file_url`, `created_at`
-- `gallery`: `id`, `title`, `category`, `date`, `image`, `created_at`
-- `volunteers`: `id`, `name`, `phone`, `email`, `role`, `motivation`, `status`, `created_at`
-- `donors`: `id`, `salutation`, `name`, `public_name`, `anonymous`, `phone`, `email`, `city`, `prayer`, `campaign`, `amount`, `payment_method`, `status`, `created_at`
-- `messages`: `id`, `name`, `email`, `phone`, `subject`, `message`, `status`, `created_at`
+## Cara Menjalankan Migrasi
 
-Gunakan Supabase Storage untuk gambar dan PDF. Simpan URL file pada tabel, bukan data Base64. Terapkan Supabase Auth dan Row Level Security sebelum website dipublikasikan.
+1. Buka Supabase Dashboard project `tnwnmotbjhdefkzsdpuj`.
+2. Masuk ke menu `SQL Editor`.
+3. Buka file `supabase/wbs_supabase_migration.sql`.
+4. Jalankan seluruh SQL.
+5. Setelah berhasil, refresh website.
+
+## Tabel Yang Dibuat
+
+- `programs`
+- `campaigns`
+- `articles`
+- `gallery`
+- `videos`
+- `documents`
+- `volunteers`
+- `donors`
+- `messages`
+
+## Perilaku Website
+
+- Website tetap memiliki fallback data lokal agar tidak kosong jika Supabase belum siap.
+- Setelah tabel Supabase tersedia, website akan mengambil data dari Supabase dan memperbarui tampilan.
+- Form publik seperti donasi, relawan, dan kontak akan mencoba menyimpan data ke Supabase.
+- Data artikel, campaign, dokumen, galeri, dan video disiapkan sebagai tabel terpisah agar mudah dikelola dan dimigrasikan.
+
+## Keamanan
+
+SQL migrasi sudah mengaktifkan Row Level Security.
+
+- Konten publik (`programs`, `campaigns`, `articles`, `gallery`, `videos`, `documents`) bisa dibaca publik.
+- Data sensitif (`donors`, `volunteers`, `messages`) hanya menerima insert dari publik, tetapi tidak bisa dibaca publik.
+- Akses kelola penuh disiapkan untuk role `authenticated`.
+
+Untuk produksi, dashboard admin sebaiknya diganti dari login prototype lokal menjadi Supabase Auth agar pengelolaan data benar-benar aman lintas perangkat.

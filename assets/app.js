@@ -42,6 +42,8 @@
   function setupForms(){document.querySelectorAll('[data-public-form]').forEach(form=>form.addEventListener('submit',event=>{event.preventDefault();const type=form.dataset.publicForm;const data=Object.fromEntries(new FormData(form));repo.save(type,{id:WBS.uid(type==='volunteers'?'VOL':'MSG'),...data,status:'Baru',createdAt:new Date().toISOString()});const subject=String(data.subject||'');form.reset();toast(type==='volunteers'?'Pendaftaran relawan berhasil disimpan':subject==='Donasi Buku'?'Data donasi buku berhasil disimpan':'Pesan berhasil disimpan')}))}
   function setupDialogs(){document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>document.getElementById(button.dataset.closeDialog).close()))}
 
-  document.addEventListener('DOMContentLoaded',()=>{setupNavigation();setupDialogs();renderPrograms();renderCampaigns();setupCampaignFilters();renderArticles();renderGallery();renderVideos();renderDocuments();renderCampaignDetail();renderArticleDetail();setupDonation();setupForms();setupReveal()});
+  function renderAll(){renderPrograms();renderCampaigns();renderArticles();renderGallery();renderVideos();renderDocuments();renderCampaignDetail();renderArticleDetail();setupReveal()}
+  document.addEventListener('DOMContentLoaded',()=>{setupNavigation();setupDialogs();renderAll();setupCampaignFilters();setupDonation();setupForms();WBS.hydrateFromSupabase?.().then(renderAll).catch(error=>console.warn(error.message))});
+  window.addEventListener('wbs:data-sync',renderAll);
   window.WBSApp={repo,rupiah,date,node,image,toast,youtubeId,youtubeThumb,renderCampaigns,renderArticles,renderGallery,renderVideos,renderDocuments};
 })();
