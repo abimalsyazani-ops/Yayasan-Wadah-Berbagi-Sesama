@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wbs-admin-pwa-v10';
+const CACHE_NAME = 'wbs-admin-pwa-v11';
 const ADMIN_ASSETS = [
   './admin.html',
   './admin.webmanifest',
@@ -6,7 +6,9 @@ const ADMIN_ASSETS = [
   './assets/data-store.js',
   './assets/app.js',
   './assets/admin.js',
-  './assets/wbs-logo.png'
+  './assets/wbs-logo.png',
+  './assets/wbs-admin-icon-192.png',
+  './assets/wbs-admin-icon-512.png'
 ];
 
 self.addEventListener('install', event => {
