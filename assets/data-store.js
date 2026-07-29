@@ -36,6 +36,11 @@
       {id:'gal-5',title:'Relawan WBS di Lapangan',category:'Relawan',date:'2026-05-14',image:'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=1000&q=80'},
       {id:'gal-6',title:'Program Gizi Keluarga',category:'Pangan',date:'2026-05-04',image:'https://images.unsplash.com/photo-1494390248081-4e521a5940db?w=1000&q=80'}
     ],
+    videos:[
+      {id:'vid-1',title:'Dokumentasi Kegiatan WBS',category:'Dokumentasi',date:'2026-06-20',url:'https://www.youtube.com/watch?v=ysz5S6PUM-U'},
+      {id:'vid-2',title:'Cerita Relawan WBS',category:'Relawan',date:'2026-06-14',url:'https://youtu.be/ysz5S6PUM-U'},
+      {id:'vid-3',title:'Penyaluran Bantuan Pangan',category:'Pangan',date:'2026-06-08',url:'https://www.youtube.com/watch?v=ysz5S6PUM-U'}
+    ],
     documents:[
       {id:'doc-kegiatan',category:'Laporan Kegiatan',title:'Laporan Kegiatan Yayasan',period:'Diperbarui berkala',url:'mailto:wadahberbagisesama48@gmail.com?subject=Permintaan%20Laporan%20Kegiatan%20WBS',fileName:''},
       {id:'doc-penyaluran',category:'Laporan Penyaluran',title:'Laporan Penyaluran Bantuan',period:'Diperbarui berkala',url:'mailto:wadahberbagisesama48@gmail.com?subject=Permintaan%20Laporan%20Penyaluran%20WBS',fileName:''},
@@ -47,7 +52,7 @@
     volunteers:[],donors:[],messages:[]
   };
 
-  const keys={programs:'wbs_programs_v2',campaigns:'wbs_campaigns_v2',articles:'wbs_articles_v2',documents:'wbs_documents_v2',gallery:'wbs_gallery_v2',volunteers:'wbs_volunteers_v2',donors:'wbs_donors_v2',messages:'wbs_messages_v2'};
+  const keys={programs:'wbs_programs_v2',campaigns:'wbs_campaigns_v2',articles:'wbs_articles_v2',documents:'wbs_documents_v2',gallery:'wbs_gallery_v2',videos:'wbs_videos_v2',volunteers:'wbs_volunteers_v2',donors:'wbs_donors_v2',messages:'wbs_messages_v2'};
   class LocalRepository{
     list(type){const custom=this.custom(type);const base=seed[type]||[];return [...custom,...base.filter(item=>!custom.some(entry=>entry.id===item.id))]}
     custom(type){try{return JSON.parse(localStorage.getItem(keys[type])||'[]')}catch{return[]}}
