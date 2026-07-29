@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>http://127.0.0.1:8765/index.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/tentang.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/fokus.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/fokus-sosial.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/fokus-pendidikan.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/fokus-kesehatan.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/fokus-pangan.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/donasi.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/campaign-detail.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/artikel.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/article-detail.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/relawan.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/transparansi.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/galeri.html</loc></url>
+  <url><loc>http://127.0.0.1:8765/kontak.html</loc></url>
+</urlset>
