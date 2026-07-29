@@ -35,4 +35,5 @@
 .focus-illustration{height:132px;margin:-9px -9px 18px;border-radius:15px;overflow:hidden;background:var(--green-light)}.focus-illustration img{width:100%;height:100%;object-fit:cover;transition:.35s}.focus-card:hover .focus-illustration img{transform:scale(1.05)}
 .program-points{display:grid;gap:10px;margin:10px 0 18px;padding:0;list-style:none}.program-points li{position:relative;padding:12px 14px 12px 38px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--text-soft);font-size:13px}.program-points li:before{content:"";position:absolute;left:14px;top:18px;width:8px;height:8px;border-radius:50%;background:var(--gold)}
 @media(max-width:900px){.campaign-detail-app .feed-head{display:block}.campaign-detail-app .feed-head h3{font-size:22px}.campaign-detail-app .feed-tabs{width:100%;margin-top:14px}.campaign-detail-app .feed-tabs button{flex:1}}
+.page-hero{padding-bottom:34px}.page-hero+.section{padding-top:44px}@media(max-width:560px){.page-hero{padding-bottom:30px}.page-hero+.section{padding-top:34px}}
 
