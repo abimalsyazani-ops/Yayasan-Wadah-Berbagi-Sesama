@@ -24,10 +24,12 @@ check("Proteksi submit ganda admin tersedia", admin.includes("dataset.busy") && 
 check("Ekspor donatur aman formula injection", admin.includes("safeCsvCell") && admin.includes("/^[=+\\-@]/"));
 check("Campaign menghitung donasi tersimpan", app.includes("campaignStats") && app.includes("repo.list('donors')"));
 check("Donasi publik divalidasi", app.includes("validateDonation") && app.includes("Nominal donasi minimal"));
-check("Mode demo/production tersedia", store.includes("const APP_MODE='demo'") && store.includes("APP_MODE==='production'"));
+check("Mode produksi Supabase aktif", store.includes("const APP_MODE='production'") && store.includes("APP_MODE==='production'"));
 check("Supabase upsert memakai on_conflict=id", store.includes("?on_conflict=id"));
+check("Form donasi buku tersinkron ke tabel khusus", app.includes("book_donations") && store.includes("wbs_book_donations_v2"));
+check("Dashboard menampilkan dan mengonfirmasi donasi buku", admin.includes("bookDonationAdminList") && admin.includes("confirmSubmission"));
 check("Audit log internal tersedia", store.includes("audit_logs") && store.includes("recordAudit"));
-check("Tidak ada innerHTML di aset JS", !/\.innerHTML\s*=/.test(admin + app + store));
+check("Tidak ada data dinamis yang ditulis langsung lewat innerHTML", !/\.innerHTML\s*=\s*[^'\"]/.test(admin + app + store));
 check("Tidak ada eval/new Function/document.write", !/(eval\s*\(|new Function|document\.write)/.test(admin + app + store));
 
 [

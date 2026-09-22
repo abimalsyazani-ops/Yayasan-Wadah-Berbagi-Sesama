@@ -5,6 +5,7 @@ Website sudah disiapkan untuk membaca dan menyimpan data ke Supabase project:
 - URL: `https://tnwnmotbjhdefkzsdpuj.supabase.co`
 - Publishable key: sudah dipasang di `assets/data-store.js`
 - SQL migrasi: `supabase/wbs_supabase_migration.sql`
+- SQL pembaruan donasi buku: `supabase/book_donations_update.sql`
 - Schema Finance CRM: `supabase-schema.sql`
 
 > Catatan 2026: Supabase Data API membutuhkan grant dan RLS policy yang jelas agar tabel bisa diakses melalui API. File schema terbaru sudah menambahkan grant dasar dan policy RLS.
@@ -13,10 +14,10 @@ Website sudah disiapkan untuk membaca dan menyimpan data ke Supabase project:
 
 1. Buka Supabase Dashboard project `tnwnmotbjhdefkzsdpuj`.
 2. Masuk ke menu `SQL Editor`.
-3. Buka file `supabase/wbs_supabase_migration.sql`.
-4. Jalankan seluruh SQL.
+3. Untuk project yang sudah pernah dimigrasikan, buka dan jalankan `supabase/book_donations_update.sql`.
+4. Untuk instalasi baru, jalankan seluruh isi `supabase/wbs_supabase_migration.sql` (pembaruan donasi buku sudah termasuk di dalamnya).
 5. Untuk fondasi WBS Finance CRM, jalankan juga `supabase-schema.sql`.
-6. Setelah berhasil, ubah `APP_MODE` di `assets/data-store.js` menjadi `"production"`.
+6. Pastikan `APP_MODE` di `assets/data-store.js` bernilai `"production"` (sudah aktif pada versi terbaru).
 7. Buat akun admin pertama melalui Supabase Auth.
 8. Isi tabel `profiles` untuk user admin pertama dengan role `super_admin`.
 9. Refresh website.
@@ -30,6 +31,7 @@ Website sudah disiapkan untuk membaca dan menyimpan data ke Supabase project:
 - `videos`
 - `documents`
 - `volunteers`
+- `book_donations`
 - `donors`
 - `messages`
 
@@ -37,7 +39,8 @@ Website sudah disiapkan untuk membaca dan menyimpan data ke Supabase project:
 
 - Website tetap memiliki fallback data lokal agar tidak kosong jika Supabase belum siap.
 - Setelah tabel Supabase tersedia, website akan mengambil data dari Supabase dan memperbarui tampilan.
-- Form publik seperti donasi, relawan, dan kontak akan mencoba menyimpan data ke Supabase.
+- Form publik seperti donasi, relawan, donasi buku, dan kontak menunggu konfirmasi Supabase sebelum menampilkan pesan berhasil.
+- Dashboard admin memuat ulang data Supabase setelah login dan menyediakan tombol WhatsApp, Email, serta Konfirmasi untuk tindak lanjut.
 - Data artikel, campaign, dokumen, galeri, dan video disiapkan sebagai tabel terpisah agar mudah dikelola dan dimigrasikan.
 
 ## Keamanan
@@ -45,10 +48,10 @@ Website sudah disiapkan untuk membaca dan menyimpan data ke Supabase project:
 SQL migrasi sudah mengaktifkan Row Level Security.
 
 - Konten publik (`programs`, `campaigns`, `articles`, `gallery`, `videos`, `documents`) bisa dibaca publik.
-- Data sensitif (`donors`, `volunteers`, `messages`) hanya menerima insert dari publik, tetapi tidak bisa dibaca publik.
+- Data sensitif (`donors`, `volunteers`, `book_donations`, `messages`) hanya menerima insert dari publik, tetapi tidak bisa dibaca publik.
 - Akses kelola penuh disiapkan untuk role `authenticated`.
 
-Untuk produksi, dashboard admin sebaiknya diganti dari login prototype lokal menjadi Supabase Auth agar pengelolaan data benar-benar aman lintas perangkat.
+Dashboard admin menggunakan Supabase Auth agar data dapat dikelola lintas perangkat.
 
 ## Admin Pertama
 
