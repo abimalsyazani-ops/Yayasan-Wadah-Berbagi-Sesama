@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wbs-admin-pwa-v13';
+const CACHE_NAME = 'wbs-admin-pwa-v14';
 const ADMIN_ASSETS = [
   './admin.html',
   './admin.webmanifest',
@@ -10,6 +10,7 @@ const ADMIN_ASSETS = [
   './assets/wbs-admin-icon-192.png',
   './assets/wbs-admin-icon-512.png'
 ];
+const ADMIN_URLS = new Set(ADMIN_ASSETS.map(path => new URL(path, self.location.href).href));
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ADMIN_ASSETS)));
@@ -23,13 +24,17 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+  const cacheable = ADMIN_URLS.has(event.request.url);
+  const networkRequest = new Request(event.request, { cache: 'reload' });
   event.respondWith(
-    fetch(event.request)
+    fetch(networkRequest)
       .then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        if (cacheable && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => cacheable ? caches.match(event.request) : Response.error())
   );
 });
