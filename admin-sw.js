@@ -3,7 +3,7 @@ const ADMIN_ASSETS = [
   './admin.html',
   './admin.webmanifest',
   './assets/styles.css',
-  './assets/data-store.js',
+  './assets/data-store.js?v=20260923-2',
   './assets/app.js',
   './assets/admin.js',
   './assets/wbs-logo.png',

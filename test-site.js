@@ -15,6 +15,7 @@ const store = read("assets/data-store.js");
 const adminSw = read("admin-sw.js");
 const schema = read("supabase-schema.sql");
 const mediaStorage = read("supabase/media_storage_update.sql");
+const appPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && file !== "download.html").map(read);
 
 check("Admin session tidak memakai string active", !/sessionStorage\.(?:setItem|getItem)\(sessionKey,\s*['"]active['"]/.test(admin));
 check("Production login memakai Supabase password auth", admin.includes("signInWithPassword"));
@@ -40,6 +41,7 @@ check("Donasi publik divalidasi", app.includes("validateDonation") && app.includ
 check("Mode produksi Supabase aktif", store.includes("const APP_MODE='production'") && store.includes("APP_MODE==='production'"));
 check("Publishable key tidak dikirim sebagai Bearer JWT", store.includes("if(this.accessToken)headers.Authorization='Bearer '+this.accessToken") && !store.includes("this.accessToken||this.key"));
 check("PWA admin tidak mencache seluruh website", adminSw.includes("wbs-admin-pwa-v14") && adminSw.includes("ADMIN_URLS.has(event.request.url)") && adminSw.includes("cache: 'reload'"));
+check("Semua halaman memakai data-store berversi", appPages.every(html => html.includes("assets/data-store.js?v=20260923-2")));
 check("Supabase upsert memakai on_conflict=id", store.includes("?on_conflict=id"));
 check("Form donasi buku tersinkron ke tabel khusus", app.includes("book_donations") && store.includes("wbs_book_donations_v2"));
 check("Dashboard menampilkan dan mengonfirmasi donasi buku", admin.includes("bookDonationAdminList") && admin.includes("confirmSubmission"));
