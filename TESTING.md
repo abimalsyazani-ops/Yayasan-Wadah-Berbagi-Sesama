@@ -51,6 +51,7 @@ Lingkungan: lokal `http://127.0.0.1:8765/`
 | Cache data produksi | Tidak memenuhi `localStorage` | Pengujian mencatat 0 penulisan browser | Lulus | `node test-production-storage.js` |
 | Cache browser versi lama | Dibersihkan setelah data server dimuat | Kunci data WBS lokal dihapus setelah sinkronisasi berhasil | Lulus | Sesi Supabase tetap dipertahankan |
 | Gagal menyimpan ke server | Data lama dipulihkan | Rollback cache memori berhasil | Lulus | Tidak menampilkan sukses palsu |
+| Form publik dengan publishable key | Header `apikey` tanpa Bearer JWT | Permintaan anonim tidak menghasilkan autentikasi JWT palsu | Lulus | Pesan, relawan, donasi buku, dan donasi |
 | XSS via data pengguna | Tidak dieksekusi sebagai HTML | Tidak ada `.innerHTML =` pada aset JS | Lulus statis | DOM memakai `textContent`/node builder |
 | Session admin `active` | Tidak boleh dipakai | Tidak ditemukan pola session `active` | Lulus | Session demo memakai payload + hash |
 | Supabase production login | Sesi autentikasi aktif | Login Google dan callback Vercel berhasil | Lulus live | Akun admin Supabase |

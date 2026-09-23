@@ -52,7 +52,7 @@
   class SupabaseRestSync{
     constructor(config){this.url=config.url.replace(/\/$/,'');this.key=config.key;this.accessToken='';this.tables=config.tables;this.enabled=Boolean(this.url&&this.key)}
     setAccessToken(token){this.accessToken=token||''}
-    headers(extra={}){return{apikey:this.key,Authorization:'Bearer '+(this.accessToken||this.key),'Content-Type':'application/json',...extra}}
+    headers(extra={}){const headers={apikey:this.key,'Content-Type':'application/json',...extra};if(this.accessToken)headers.Authorization='Bearer '+this.accessToken;return headers}
     endpoint(type,query=''){return this.url+'/rest/v1/'+type+query}
     canWrite(type){return Boolean(this.accessToken)||['donors','volunteers','book_donations','messages'].includes(type)}
     async list(type){if(APP_MODE!=='production'||!this.enabled||!this.tables.includes(type))return[];const response=await fetch(this.endpoint(type,'?select=*&order=createdAt.desc.nullslast'),{headers:this.headers()});if(!response.ok)throw new Error('Supabase list '+type+' failed: '+response.status);return response.json()}
