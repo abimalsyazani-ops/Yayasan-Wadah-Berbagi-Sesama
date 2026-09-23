@@ -7,6 +7,7 @@
   const fallbackImage='assets/wbs-logo.png';
   const applyImage=(item,src,alt)=>{item.src=src||fallbackImage;item.alt=alt||'Dokumentasi Yayasan Wadah Berbagi Sesama';item.loading='lazy';item.onerror=()=>{if(item.src.includes(fallbackImage))return;item.src=fallbackImage};return item};
   const image=(src,alt)=>applyImage(document.createElement('img'),src,alt);
+  const setText=(root,selector,value)=>root.querySelectorAll(selector).forEach(element=>{element.textContent=value});
   const params=new URLSearchParams(location.search);
   const cleanText=(value,max=500)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
   const normalizePhone=value=>String(value??'').replace(/[^\d+]/g,'').trim();
@@ -59,7 +60,29 @@
   const galleryImages=item=>{const rows=Array.isArray(item.images)?item.images.filter(Boolean):[];if(!rows.length&&item.image)rows.push(item.image);return rows.length?rows:[fallbackImage]};
   function galleryCard(item){const images=galleryImages(item),link=node('a','gallery-album reveal');link.href='gallery-detail.html?id='+encodeURIComponent(item.id);link.setAttribute('aria-label','Buka album '+item.title);const collage=node('div','gallery-collage');images.slice(0,4).forEach((src,index)=>{const tile=node('div','gallery-tile');tile.append(image(src,item.title+' foto '+(index+1)));collage.append(tile)});if(images.length>4)collage.append(node('span','gallery-count','+'+(images.length-4)));const caption=node('div','gallery-caption album-caption');caption.append(node('span','tag',item.category),node('strong','',item.title),node('small','',images.length+' foto  -  '+date(item.date)));link.append(collage,caption);return link}
   function renderGallery(){document.querySelectorAll('[data-gallery-list]').forEach(grid=>{grid.textContent='';let rows=repo.list('gallery');const limit=Number(grid.dataset.limit||0);if(limit)rows=rows.slice(0,limit);rows.forEach(item=>grid.append(galleryCard(item)));setupReveal()})}
-  function renderGalleryDetail(){const root=document.querySelector('[data-gallery-detail]');if(!root)return;const item=repo.find('gallery',params.get('id'))||repo.list('gallery')[0];if(!item){root.innerHTML='<div class="campaign-empty">Album galeri resmi belum tersedia. Silakan tambahkan album melalui dashboard admin.</div>';return}const images=galleryImages(item);document.title=item.title+' | Galeri WBS';document.querySelector('[data-title]').textContent=item.title;document.querySelector('[data-category]').textContent=item.category;document.querySelector('[data-date]').textContent=date(item.date);document.querySelector('[data-count]').textContent=images.length+' foto dokumentasi';const grid=root.querySelector('[data-gallery-detail-grid]');grid.textContent='';images.forEach((src,index)=>{const figure=node('figure','gallery-detail-item reveal');figure.append(image(src,item.title+' dokumentasi '+(index+1)),node('figcaption','',item.title+' - Foto '+(index+1)));grid.append(figure)});setupReveal()}
+  function renderGalleryDetail(){
+    const root=document.querySelector('[data-gallery-detail]');
+    if(!root)return;
+    const item=repo.find('gallery',params.get('id'))||repo.list('gallery')[0];
+    const grid=root.querySelector('[data-gallery-detail-grid]');
+    if(!item){
+      setText(document,'[data-title]','Detail Galeri');
+      setText(document,'[data-category]','Dokumentasi');
+      setText(document,'[data-date]','');
+      setText(document,'[data-count]','');
+      grid.replaceChildren(node('div','campaign-empty','Album galeri resmi belum tersedia. Silakan kembali lagi setelah dokumentasi dipublikasikan.'));
+      return;
+    }
+    const images=galleryImages(item);
+    document.title=item.title+' | Galeri WBS';
+    setText(document,'[data-title]',item.title);
+    setText(document,'[data-category]',item.category);
+    setText(document,'[data-date]',date(item.date));
+    setText(document,'[data-count]',images.length+' foto dokumentasi');
+    grid.replaceChildren();
+    images.forEach((src,index)=>{const figure=node('figure','gallery-detail-item reveal');figure.append(image(src,item.title+' dokumentasi '+(index+1)),node('figcaption','',item.title+' - Foto '+(index+1)));grid.append(figure)});
+    setupReveal();
+  }
 
   function youtubeId(url){try{const parsed=new URL(url);if(parsed.hostname.includes('youtu.be'))return parsed.pathname.slice(1).split('/')[0];if(parsed.searchParams.get('v'))return parsed.searchParams.get('v');const parts=parsed.pathname.split('/').filter(Boolean);const index=parts.findIndex(part=>['embed','shorts','live'].includes(part));return index>=0?parts[index+1]:''}catch{return''}}
   function youtubeThumb(url){const id=youtubeId(url);return id?'https://img.youtube.com/vi/'+id+'/hqdefault.jpg':'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900&q=80'}
@@ -73,9 +96,108 @@
   function donorAvatar(entry){const avatar=node('div','donor-avatar');avatar.textContent=entry.anonymous?'WB':donorDisplayName(entry).split(' ').map(part=>part[0]).join('').slice(0,2).toUpperCase();return avatar}
   function donorItem(entry){const card=node('article','donor-item');card.append(donorAvatar(entry));const body=node('div');body.append(node('strong','',donorDisplayName(entry)),node('p','',`Berdonasi sebesar ${rupiah(entry.amount)}`),node('span','',relativeTime(entry.createdAt)));card.append(body);return card}
   function prayerItem(entry){const card=node('article','prayer-card');const head=node('div','prayer-head');head.append(donorAvatar(entry));const info=node('div');info.append(node('strong','',donorDisplayName(entry)),node('span','',relativeTime(entry.createdAt)));head.append(info);card.append(head,node('p','',entry.prayer),node('div','prayer-actions','Aamiin  ·  Bagikan doa'));return card}
-  function renderCampaignDetail(){const root=document.querySelector('[data-campaign-detail]');if(!root)return;const item=repo.find('campaigns',params.get('id'))||repo.list('campaigns')[0];if(!item){root.innerHTML='<div class="campaign-empty">Campaign resmi belum tersedia. Silakan tambahkan campaign melalui dashboard admin.</div>';return}const stats=campaignStats(item),donors=donorRows(item),prayers=donors.filter(entry=>cleanText(entry.prayer,500));const displayStats={...stats,donors:stats.donors||donors.length,collected:stats.collected,percent:stats.percent};const setAll=(selector,value)=>root.querySelectorAll(selector).forEach(element=>{element.textContent=value});document.title=item.title+' | WBS';root.querySelector('[data-title]').textContent=item.title;root.querySelector('[data-category]').textContent=item.category;root.querySelector('[data-description]').textContent=item.description;root.querySelector('[data-full-description]').textContent=item.description+' Program ini dikelola dengan verifikasi penerima manfaat, dokumentasi kegiatan, dan laporan penyaluran agar setiap amanah donatur dapat tersampaikan secara bertanggung jawab.';applyImage(root.querySelector('[data-image]'),item.image,item.title);setAll('[data-raised]',rupiah(displayStats.collected));setAll('[data-target]',rupiah(displayStats.target));setAll('[data-deadline]',item.deadline?date(item.deadline)+'  -  '+remainingDays(item.deadline):'Berjalan rutin');setAll('[data-donors]',displayStats.donors+' donatur');setAll('[data-progress-label]',displayStats.percent+'% tercapai');root.querySelectorAll('[data-progress]').forEach(element=>{element.style.width=displayStats.percent+'%'});root.querySelector('[data-donor-count]').textContent=displayStats.donors;root.querySelector('[data-prayer-count]').textContent=prayers.length;const donorList=root.querySelector('[data-donor-list]'),prayerList=root.querySelector('[data-prayer-list]');donorList.textContent='';prayerList.textContent='';if(!donors.length)donorList.append(node('div','campaign-empty','Belum ada donatur terkonfirmasi untuk campaign ini.'));if(!prayers.length)prayerList.append(node('div','campaign-empty','Belum ada doa donatur untuk campaign ini.'));donors.slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).forEach(entry=>donorList.append(donorItem(entry)));prayers.slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).forEach(entry=>prayerList.append(prayerItem(entry)));root.querySelectorAll('[data-donate]').forEach(button=>{button.onclick=()=>openDonation(item.title)});root.querySelectorAll('[data-share-detail]').forEach(button=>{button.onclick=()=>shareCampaign(item)})}
-  function renderProgramDetail(){const root=document.querySelector('[data-program-detail]');if(!root)return;const item=repo.find('programs',params.get('id'))||repo.list('programs')[0],detail=programDetails[item.category]||programDetails.sosial;document.title=item.title+' | Program WBS';root.querySelector('[data-title]').textContent=item.title;root.querySelector('[data-category]').textContent=categoryLabel(item.category);root.querySelector('[data-description]').textContent=item.description;root.querySelector('[data-narrative]').textContent=detail.narrative;applyImage(root.querySelector('[data-image]'),item.image,item.title);const goals=root.querySelector('[data-goals]'),achievements=root.querySelector('[data-achievements]');goals.textContent='';achievements.textContent='';detail.goals.forEach(text=>goals.append(node('li','',text)));detail.achievements.forEach(text=>achievements.append(node('li','',text)));const support=root.querySelector('[data-support]'),back=root.querySelector('[data-back-category]');support.href='donasi.html?program='+encodeURIComponent(item.category);support.textContent='Dukung Program Ini';back.href='fokus-'+item.category+'.html';back.textContent='Kembali ke Fokus '+categoryLabel(item.category)}
-  function renderArticleDetail(){const root=document.querySelector('[data-article-detail]');if(!root)return;const item=repo.find('articles',params.get('id'))||repo.list('articles')[0];if(!item){root.innerHTML='<div class="campaign-empty">Artikel resmi belum tersedia. Silakan tambahkan artikel melalui dashboard admin.</div>';return}document.title=item.title+' | WBS';root.querySelector('[data-title]').textContent=item.title;root.querySelector('[data-category]').textContent=item.category;root.querySelector('[data-date]').textContent=date(item.date);applyImage(root.querySelector('[data-image]'),item.image,item.title);const content=root.querySelector('[data-content]');content.textContent='';String(item.content||item.excerpt||'').split(/\n\s*\n/).forEach(paragraph=>content.append(node('p','',paragraph)))}
+  function renderCampaignDetail(){
+    const root=document.querySelector('[data-campaign-detail]');
+    if(!root)return;
+    const item=repo.find('campaigns',params.get('id'))||repo.list('campaigns')[0];
+    const donorList=root.querySelector('[data-donor-list]'),prayerList=root.querySelector('[data-prayer-list]');
+    if(!item){
+      setText(root,'[data-title]','Campaign belum tersedia');
+      setText(root,'[data-category]','WBS');
+      setText(root,'[data-description]','Campaign resmi sedang disiapkan. Silakan kembali lagi setelah campaign dipublikasikan.');
+      setText(root,'[data-full-description]','Informasi campaign akan tampil di halaman ini setelah dipublikasikan oleh admin WBS.');
+      setText(root,'[data-raised]',rupiah(0));
+      setText(root,'[data-target]',rupiah(0));
+      setText(root,'[data-deadline]','Belum tersedia');
+      setText(root,'[data-donors]','0 donatur');
+      setText(root,'[data-progress-label]','0% tercapai');
+      setText(root,'[data-donor-count]','0');
+      setText(root,'[data-prayer-count]','0');
+      root.querySelectorAll('[data-progress]').forEach(element=>{element.style.width='0%'});
+      donorList.replaceChildren(node('div','campaign-empty','Belum ada data donatur untuk ditampilkan.'));
+      prayerList.replaceChildren(node('div','campaign-empty','Belum ada doa donatur untuk ditampilkan.'));
+      root.querySelectorAll('[data-donate],[data-share-detail]').forEach(button=>{button.disabled=true;button.onclick=null});
+      return;
+    }
+    const stats=campaignStats(item),donors=donorRows(item),prayers=donors.filter(entry=>cleanText(entry.prayer,500));
+    const displayStats={...stats,donors:stats.donors||donors.length,collected:stats.collected,percent:stats.percent};
+    document.title=item.title+' | WBS';
+    setText(root,'[data-title]',item.title);
+    setText(root,'[data-category]',item.category);
+    setText(root,'[data-description]',item.description);
+    setText(root,'[data-full-description]',item.description+' Program ini dikelola dengan verifikasi penerima manfaat, dokumentasi kegiatan, dan laporan penyaluran agar setiap amanah donatur dapat tersampaikan secara bertanggung jawab.');
+    applyImage(root.querySelector('[data-image]'),item.image,item.title);
+    setText(root,'[data-raised]',rupiah(displayStats.collected));
+    setText(root,'[data-target]',rupiah(displayStats.target));
+    setText(root,'[data-deadline]',item.deadline?date(item.deadline)+'  -  '+remainingDays(item.deadline):'Berjalan rutin');
+    setText(root,'[data-donors]',displayStats.donors+' donatur');
+    setText(root,'[data-progress-label]',displayStats.percent+'% tercapai');
+    setText(root,'[data-donor-count]',displayStats.donors);
+    setText(root,'[data-prayer-count]',prayers.length);
+    root.querySelectorAll('[data-progress]').forEach(element=>{element.style.width=displayStats.percent+'%'});
+    donorList.replaceChildren();
+    prayerList.replaceChildren();
+    if(!donors.length)donorList.append(node('div','campaign-empty','Belum ada donatur terkonfirmasi untuk campaign ini.'));
+    if(!prayers.length)prayerList.append(node('div','campaign-empty','Belum ada doa donatur untuk campaign ini.'));
+    donors.slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).forEach(entry=>donorList.append(donorItem(entry)));
+    prayers.slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).forEach(entry=>prayerList.append(prayerItem(entry)));
+    root.querySelectorAll('[data-donate]').forEach(button=>{button.disabled=false;button.onclick=()=>openDonation(item.title)});
+    root.querySelectorAll('[data-share-detail]').forEach(button=>{button.disabled=false;button.onclick=()=>shareCampaign(item)});
+  }
+  function renderProgramDetail(){
+    const root=document.querySelector('[data-program-detail]');
+    if(!root)return;
+    const item=repo.find('programs',params.get('id'))||repo.list('programs')[0];
+    const goals=root.querySelector('[data-goals]'),achievements=root.querySelector('[data-achievements]');
+    if(!item){
+      setText(root,'[data-title]','Program belum tersedia');
+      setText(root,'[data-category]','Program WBS');
+      setText(root,'[data-description]','Program resmi sedang disiapkan.');
+      setText(root,'[data-narrative]','Informasi program akan tampil setelah dipublikasikan oleh admin WBS.');
+      goals.replaceChildren(node('li','','Tujuan program akan diperbarui setelah data resmi tersedia.'));
+      achievements.replaceChildren(node('li','','Capaian program akan diperbarui setelah kegiatan berjalan.'));
+      root.querySelector('[data-support]').href='donasi.html';
+      root.querySelector('[data-back-category]').href='fokus.html';
+      root.querySelector('[data-back-category]').textContent='Kembali ke Fokus Program';
+      return;
+    }
+    const detail=programDetails[item.category]||programDetails.sosial;
+    document.title=item.title+' | Program WBS';
+    setText(root,'[data-title]',item.title);
+    setText(root,'[data-category]',categoryLabel(item.category));
+    setText(root,'[data-description]',item.description);
+    setText(root,'[data-narrative]',detail.narrative);
+    applyImage(root.querySelector('[data-image]'),item.image,item.title);
+    goals.replaceChildren();
+    achievements.replaceChildren();
+    detail.goals.forEach(text=>goals.append(node('li','',text)));
+    detail.achievements.forEach(text=>achievements.append(node('li','',text)));
+    const support=root.querySelector('[data-support]'),back=root.querySelector('[data-back-category]');
+    support.href='donasi.html?program='+encodeURIComponent(item.category);
+    support.textContent='Dukung Program Ini';
+    back.href='fokus-'+item.category+'.html';
+    back.textContent='Kembali ke Fokus '+categoryLabel(item.category);
+  }
+  function renderArticleDetail(){
+    const root=document.querySelector('[data-article-detail]');
+    if(!root)return;
+    const item=repo.find('articles',params.get('id'))||repo.list('articles')[0];
+    const content=root.querySelector('[data-content]');
+    if(!item){
+      setText(root,'[data-title]','Artikel belum tersedia');
+      setText(root,'[data-category]','Artikel WBS');
+      setText(root,'[data-date]','');
+      content.replaceChildren(node('p','','Artikel resmi sedang disiapkan. Silakan kembali lagi setelah artikel dipublikasikan.'));
+      return;
+    }
+    document.title=item.title+' | WBS';
+    setText(root,'[data-title]',item.title);
+    setText(root,'[data-category]',item.category);
+    setText(root,'[data-date]',date(item.date));
+    applyImage(root.querySelector('[data-image]'),item.image,item.title);
+    content.replaceChildren();
+    String(item.content||item.excerpt||'').split(/\n\s*\n/).forEach(paragraph=>content.append(node('p','',paragraph)));
+  }
 
   const payments={BRI:{name:'Bank Rakyat Indonesia (BRI)',number:'762001038310533',owner:'a.n. Wadah Berbagi Sesama'},BSI:{name:'Bank Syariah Indonesia (BSI)',number:'7368537424',owner:'a.n. WADAH BERBAGI SESAMA'},QRIS:{name:'QRIS Pembayaran Nasional',number:'',owner:'WADAH BERBAGI SESAMA',qris:'assets/wbs-qris.jpeg'},DANA:{name:'DANA',number:'085122900247',owner:'Nomor pembayaran WBS'},GOPAY:{name:'GoPay',number:'085122900247',owner:'Nomor pembayaran WBS'}};
   function openDonation(campaign){const dialog=document.getElementById('donationDialog');if(!dialog)return;const form=document.getElementById('donationForm');form.reset();form.classList.remove('hidden');document.getElementById('paymentResult').classList.add('hidden');const campaignName=cleanText(campaign||'Donasi Umum WBS',120);form.elements.campaign.value=campaignName;document.getElementById('donationCampaignName').textContent=campaignName;dialog.showModal()}
