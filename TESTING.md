@@ -45,14 +45,17 @@ Lingkungan: lokal `http://127.0.0.1:8765/`
 | Nominal donasi valid | Diterima | Diterima pada smoke test | Lulus | Rp25.000 |
 | Duplikasi submit donasi | Dicegah | Lock submit dan deteksi duplikasi tersedia | Lulus statis | Cek kode `dataset.busy` dan data sama 15 menit |
 | Formula injection CSV | Teks diawali `= + - @` diamankan | Guard `safeCsvCell()` tersedia | Lulus statis | Export CSV donatur |
-| Upload foto admin tipe salah | Ditolak | Validasi MIME tersedia | Lulus statis | JPG/PNG/WEBP |
-| Upload dokumen tipe salah | Ditolak | Validasi MIME tersedia | Lulus statis | PDF/JPG/PNG/WEBP |
-| Upload melebihi 1,25 MB | Ditolak | Validasi ukuran tersedia | Lulus statis | Mengikuti teks UI lama |
+| Upload foto admin tipe salah | Ditolak | Validasi MIME tersedia | Lulus | JPG/PNG/WEBP |
+| Upload melebihi 8 MB | Ditolak | Validasi ukuran tersedia | Lulus | Foto hingga 8 MB dikompres otomatis sebelum upload |
+| Upload foto produksi | Tersimpan di Supabase Storage | Bucket `website-media`, URL publik, dan kebijakan RLS aktif | Lulus | Artikel, campaign, dan album galeri |
+| Cache data produksi | Tidak memenuhi `localStorage` | Pengujian mencatat 0 penulisan browser | Lulus | `node test-production-storage.js` |
+| Cache browser versi lama | Dibersihkan setelah data server dimuat | Kunci data WBS lokal dihapus setelah sinkronisasi berhasil | Lulus | Sesi Supabase tetap dipertahankan |
+| Gagal menyimpan ke server | Data lama dipulihkan | Rollback cache memori berhasil | Lulus | Tidak menampilkan sukses palsu |
 | XSS via data pengguna | Tidak dieksekusi sebagai HTML | Tidak ada `.innerHTML =` pada aset JS | Lulus statis | DOM memakai `textContent`/node builder |
 | Session admin `active` | Tidak boleh dipakai | Tidak ditemukan pola session `active` | Lulus | Session demo memakai payload + hash |
-| Supabase production login | `signInWithPassword()` tersedia | Fungsi tersedia | Lulus statis | Perlu akun Supabase nyata untuk uji live |
-| Supabase production session | `getSession()` tersedia | Fungsi tersedia | Lulus statis | Perlu akun Supabase nyata untuk uji live |
-| Supabase production logout | `signOut()` tersedia | Fungsi tersedia | Lulus statis | Perlu akun Supabase nyata untuk uji live |
+| Supabase production login | Sesi autentikasi aktif | Login Google dan callback Vercel berhasil | Lulus live | Akun admin Supabase |
+| Supabase production session | Dashboard membaca sesi | Dashboard admin tampil setelah callback | Lulus live | `getSession()` dan `onAuthStateChange()` |
+| Supabase production logout | `signOut()` tersedia | Fungsi tersedia | Lulus statis | Tidak dijalankan agar sesi uji tetap aktif |
 
 ## Skenario produksi yang masih membutuhkan konfigurasi
 
@@ -60,7 +63,7 @@ Lingkungan: lokal `http://127.0.0.1:8765/`
 | --- | --- | --- |
 | Login setiap role Supabase | Membutuhkan user Auth dan data `profiles` untuk tiap role | Menunggu konfigurasi |
 | RLS antar-role | Membutuhkan project Supabase production | Menunggu konfigurasi |
-| Upload bukti ke Supabase Storage | Membutuhkan bucket privat dan implementasi endpoint/Storage client production | Menunggu konfigurasi |
+| Upload bukti pembayaran | Membutuhkan desain verifikasi bukti dan bucket privat terpisah | Menunggu fitur |
 | Webhook payment gateway | Membutuhkan endpoint publik dan secret gateway | Menunggu konfigurasi |
 | OCR bukti transfer | Membutuhkan service OCR/Edge Function | Menunggu konfigurasi |
 | Dua pengguna mengedit bersamaan | Membutuhkan multi-user production | Menunggu konfigurasi |

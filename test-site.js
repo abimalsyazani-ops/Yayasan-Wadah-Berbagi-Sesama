@@ -13,6 +13,7 @@ const admin = read("assets/admin.js");
 const app = read("assets/app.js");
 const store = read("assets/data-store.js");
 const schema = read("supabase-schema.sql");
+const mediaStorage = read("supabase/media_storage_update.sql");
 
 check("Admin session tidak memakai string active", !/sessionStorage\.(?:setItem|getItem)\(sessionKey,\s*['"]active['"]/.test(admin));
 check("Production login memakai Supabase password auth", admin.includes("signInWithPassword"));
@@ -21,6 +22,13 @@ check("OAuth callback dipantau melalui onAuthStateChange", admin.includes("auth.
 check("Supabase client mendeteksi sesi dari URL", admin.includes("detectSessionInUrl:true") && admin.includes("persistSession:true"));
 check("Login Google memeriksa error OAuth", admin.includes("signInWithOAuth") && admin.includes("if(error)throw error"));
 check("Login password mengarahkan akun Google ke metode yang benar", admin.includes("gunakan tombol Masuk dengan Google"));
+check("Upload media admin memakai Supabase Storage", admin.includes("storage.from(storageBucket).upload") && admin.includes("getPublicUrl"));
+check("Penyimpanan admin menunggu sinkronisasi server", admin.includes("async function saveWithUploads") && admin.includes("await repo.saveAndSync(type,item)"));
+check("Foto sementara dibersihkan bila penyimpanan gagal", admin.includes("removeUploadedImages(uploaded)") && admin.includes("storage.from(storageBucket).remove(paths)"));
+check("Mode produksi memakai cache memori", store.includes("runtimeRows") && store.includes("APP_MODE==='production'?(runtimeRows[type]||[])"));
+check("Cache browser lama dibersihkan setelah sinkronisasi", store.includes("localStorage.removeItem(keys[type])") && store.includes("localStorage.removeItem(keys.audit_logs)"));
+check("Migrasi bucket media tersedia", mediaStorage.includes("website-media") && mediaStorage.includes("Authenticated upload website media"));
+check("Migrasi media memberi akses baca admin", mediaStorage.includes("Authenticated read website media"));
 check("Logout memakai Supabase signOut", admin.includes("auth.signOut"));
 check("Tidak ada password demo hardcoded", !/password\s*[:=]\s*['"][^'"]{4,}['"]/i.test(admin + store));
 check("Validasi MIME upload admin tersedia", admin.includes("imageTypes") && admin.includes("documentTypes"));

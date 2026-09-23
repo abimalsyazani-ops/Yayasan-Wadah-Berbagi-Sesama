@@ -73,7 +73,7 @@ Catatan: akun demo tersimpan di browser/perangkat tersebut saja. Untuk produksi 
 - Logout production memakai `supabase.auth.signOut()`.
 - Tidak ada password admin hardcoded.
 - Validasi form admin diperketat.
-- Validasi file admin: ukuran maksimal 1,25 MB, tipe file dibatasi.
+- Validasi file admin: ukuran maksimal 8 MB, tipe file dibatasi, lalu foto dikompres otomatis sebelum diunggah ke Supabase Storage.
 - Submit form dikunci saat proses berjalan agar tidak tersimpan ganda.
 - Ekspor CSV donatur dilindungi dari formula injection Excel.
 - Donasi publik divalidasi: nama, telepon, email, kota, nominal, metode pembayaran.
