@@ -40,9 +40,10 @@ check("Ekspor donatur aman formula injection", admin.includes("safeCsvCell") && 
 check("Campaign menghitung donasi tersimpan", app.includes("campaignStats") && app.includes("repo.list('donors')"));
 check("Donasi publik divalidasi", app.includes("validateDonation") && app.includes("Nominal donasi minimal"));
 check("Mode produksi Supabase aktif", store.includes("const APP_MODE='production'") && store.includes("APP_MODE==='production'"));
-check("Publishable key tidak dikirim sebagai Bearer JWT", store.includes("if(this.accessToken)headers.Authorization='Bearer '+this.accessToken") && !store.includes("this.accessToken||this.key"));
-check("PWA admin tidak mencache seluruh website", adminSw.includes("wbs-admin-pwa-v15") && adminSw.includes("ADMIN_URLS.has(event.request.url)") && adminSw.includes("cache: 'reload'"));
-check("Semua halaman memakai data-store berversi", appPages.every(html => html.includes("assets/data-store.js?v=20260923-2")));
+check("Token admin dan fallback publishable dibedakan", store.includes("if(this.accessToken)headers.Authorization='Bearer '+this.accessToken") && store.includes("else if(publicBearer)headers.Authorization='Bearer '+this.key") && !store.includes("this.accessToken||this.key"));
+check("Fallback publishable hanya dipakai setelah 401 anonim", store.includes("response.status===401&&!this.accessToken") && store.includes("this.headers(extra,true)"));
+check("PWA admin tidak mencache seluruh website", adminSw.includes("wbs-admin-pwa-v16") && adminSw.includes("ADMIN_URLS.has(event.request.url)") && adminSw.includes("cache: 'reload'"));
+check("Semua halaman memakai data-store berversi", appPages.every(html => html.includes("assets/data-store.js?v=20260924-1")));
 check("Semua halaman publik memakai app.js berversi", publicPages.every(html => html.includes("assets/app.js?v=20260923-3")));
 check("Supabase upsert memakai on_conflict=id", store.includes("?on_conflict=id"));
 check("Form donasi buku tersinkron ke tabel khusus", app.includes("book_donations") && store.includes("wbs_book_donations_v2"));

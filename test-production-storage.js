@@ -6,6 +6,8 @@ let browserWrites = 0;
 let browserRemovals = 0;
 let failNextSave = false;
 let lastRequestHeaders = null;
+let anonymousSaveAttempt = 0;
+const anonymousHeaders = [];
 
 const context = {
   console,
@@ -18,11 +20,16 @@ const context = {
   },
   fetch: async (url, options = {}) => {
     lastRequestHeaders = options.headers || null;
+    if (options.method === 'POST' && options.body?.includes('MSG-anon-header-test')) {
+      anonymousSaveAttempt += 1;
+      anonymousHeaders.push(options.headers || null);
+      if (anonymousSaveAttempt === 1) return { ok: false, status: 401, text: async () => 'Invalid API key' };
+    }
     if (options.method === 'POST' && failNextSave) {
       failNextSave = false;
-      return { ok: false, status: 500, json: async () => ({}) };
+      return { ok: false, status: 500, text: async () => 'Simulated server failure' };
     }
-    return { ok: true, status: 200, json: async () => [] };
+    return { ok: true, status: 200, json: async () => [], text: async () => '' };
   },
   setTimeout,
   clearTimeout
@@ -36,8 +43,11 @@ vm.runInContext(source, context);
 (async () => {
   const { WBS } = context;
   await WBS.supabaseSync.upsert('messages', { id: 'MSG-anon-header-test', message: 'Uji header anonim' });
-  if (!lastRequestHeaders?.apikey || lastRequestHeaders.Authorization) {
-    throw new Error('Permintaan anonim harus memakai apikey tanpa Authorization Bearer.');
+  if (!anonymousHeaders[0]?.apikey || anonymousHeaders[0].Authorization) {
+    throw new Error('Percobaan pertama anonim harus memakai apikey tanpa Authorization Bearer.');
+  }
+  if (anonymousSaveAttempt !== 2 || anonymousHeaders[1]?.Authorization !== `Bearer ${WBS.supabaseConfig.key}`) {
+    throw new Error('Permintaan anonim 401 harus dicoba ulang dengan fallback publishable Bearer.');
   }
   WBS.supabaseSync.setAccessToken('test-access-token');
   await WBS.hydrateFromSupabase();
@@ -72,7 +82,7 @@ vm.runInContext(source, context);
 
   if (browserRemovals < 1) throw new Error('Cache browser lama tidak dibersihkan setelah sinkronisasi.');
 
-  console.log(JSON.stringify({ passed: true, browserWrites, browserRemovals, checks: 6 }, null, 2));
+  console.log(JSON.stringify({ passed: true, browserWrites, browserRemovals, anonymousSaveAttempt, checks: 7 }, null, 2));
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
