@@ -52,16 +52,16 @@
   class SupabaseRestSync{
     constructor(config){this.url=config.url.replace(/\/$/,'');this.key=config.key;this.accessToken='';this.tables=config.tables;this.enabled=Boolean(this.url&&this.key)}
     setAccessToken(token){this.accessToken=token||''}
-    headers(extra={},publicBearer=false){const headers={apikey:this.key,'Content-Type':'application/json',...extra};if(this.accessToken)headers.Authorization='Bearer '+this.accessToken;else if(publicBearer)headers.Authorization='Bearer '+this.key;return headers}
+    headers(extra={}){const headers={apikey:this.key,'Content-Type':'application/json',...extra};if(this.accessToken)headers.Authorization='Bearer '+this.accessToken;return headers}
     endpoint(type,query=''){return this.url+'/rest/v1/'+type+query}
     canWrite(type){return Boolean(this.accessToken)||['donors','volunteers','book_donations','messages'].includes(type)}
     async list(type){if(APP_MODE!=='production'||!this.enabled||!this.tables.includes(type))return[];const response=await fetch(this.endpoint(type,'?select=*&order=createdAt.desc.nullslast'),{headers:this.headers()});if(!response.ok)throw new Error('Supabase list '+type+' failed: '+response.status);return response.json()}
     async upsert(type,item){
       if(APP_MODE!=='production'||!this.enabled||!this.tables.includes(type)||!this.canWrite(type))return null;
-      const endpoint=this.endpoint(type,'?on_conflict=id'),body=JSON.stringify(item),extra={Prefer:'resolution=merge-duplicates,return=minimal'};
-      let response=await fetch(endpoint,{method:'POST',headers:this.headers(extra),body});
-      // Some managed gateways require the public API key in both headers, as sent by supabase-js.
-      if(response.status===401&&!this.accessToken)response=await fetch(endpoint,{method:'POST',headers:this.headers(extra,true),body});
+      const isPublicInsert=!this.accessToken&&['donors','volunteers','book_donations','messages'].includes(type);
+      const endpoint=this.endpoint(type,isPublicInsert?'':'?on_conflict=id'),body=JSON.stringify(item);
+      const prefer=isPublicInsert?'return=minimal':'resolution=merge-duplicates,return=minimal';
+      const response=await fetch(endpoint,{method:'POST',headers:this.headers({Prefer:prefer}),body});
       if(!response.ok){let detail='';try{detail=String(await response.text()).replace(/\s+/g,' ').trim().slice(0,240)}catch{}throw new Error('Supabase save '+type+' failed: '+response.status+(detail?' - '+detail:''))}
       return true;
     }

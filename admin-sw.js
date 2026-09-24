@@ -1,9 +1,9 @@
-const CACHE_NAME = 'wbs-admin-pwa-v16';
+const CACHE_NAME = 'wbs-admin-pwa-v17';
 const ADMIN_ASSETS = [
   './admin.html',
   './admin.webmanifest',
   './assets/styles.css',
-  './assets/data-store.js?v=20260924-1',
+  './assets/data-store.js?v=20260924-2',
   './assets/app.js?v=20260923-3',
   './assets/admin.js',
   './assets/wbs-logo.png',
