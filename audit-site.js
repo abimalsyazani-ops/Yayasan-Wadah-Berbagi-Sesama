@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const root = process.cwd();
-const htmlFiles = fs.readdirSync(root).filter((file) => file.endsWith(".html"));
+const htmlFiles = fs.readdirSync(root).filter((file) => file.endsWith(".html") && !/^google[a-z0-9]+\.html$/i.test(file));
 const assetPattern = /(?:href|src)="([^"#?]+(?:\.html|\.js|\.css|\.png|\.webmanifest|\.xml|\.txt|\.zip))[^"]*"/g;
 const report = {
   pages: htmlFiles.length,

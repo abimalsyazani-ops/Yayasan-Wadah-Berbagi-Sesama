@@ -17,8 +17,9 @@ const schema = read("supabase-schema.sql");
 const mediaStorage = read("supabase/media_storage_update.sql");
 const robots = read("robots.txt");
 const sitemap = read("sitemap.xml");
-const appPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && file !== "download.html").map(read);
-const publicPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && !["admin.html", "download.html"].includes(file)).map(read);
+const isVerificationFile = (file) => /^google[a-z0-9]+\.html$/i.test(file);
+const appPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && file !== "download.html" && !isVerificationFile(file)).map(read);
+const publicPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && !["admin.html", "download.html"].includes(file) && !isVerificationFile(file)).map(read);
 
 check("Admin session tidak memakai string active", !/sessionStorage\.(?:setItem|getItem)\(sessionKey,\s*['"]active['"]/.test(admin));
 check("Production login memakai Supabase password auth", admin.includes("signInWithPassword"));
