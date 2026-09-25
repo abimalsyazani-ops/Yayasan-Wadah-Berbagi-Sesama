@@ -15,6 +15,8 @@ const store = read("assets/data-store.js");
 const adminSw = read("admin-sw.js");
 const schema = read("supabase-schema.sql");
 const mediaStorage = read("supabase/media_storage_update.sql");
+const robots = read("robots.txt");
+const sitemap = read("sitemap.xml");
 const appPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && file !== "download.html").map(read);
 const publicPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && !["admin.html", "download.html"].includes(file)).map(read);
 
@@ -57,6 +59,11 @@ check("Semua renderer detail menangani data kosong", ["renderCampaignDetail", "r
   return start >= 0 && app.slice(start, next >= 0 ? next : undefined).includes("if(!item)");
 }));
 check("Tidak ada eval/new Function/document.write", !/(eval\s*\(|new Function|document\.write)/.test(admin + app + store));
+check("Robots memakai sitemap domain resmi", robots.includes("Sitemap: https://yayasanwadahberbagisesama.com/sitemap.xml"));
+check("Sitemap tidak memuat URL lokal", !/localhost|127\.0\.0\.1/.test(sitemap));
+check("Sitemap tidak memublikasikan halaman admin atau template detail", !/(admin\.html|(?:article|campaign|gallery|program)-detail\.html)/.test(sitemap));
+check("Canonical halaman memakai domain resmi", appPages.every(html => /<link rel="canonical" href="https:\/\/yayasanwadahberbagisesama\.com\//.test(html)));
+check("Open Graph halaman memakai URL absolut", appPages.every(html => /<meta property="og:url" content="https:\/\/yayasanwadahberbagisesama\.com\//.test(html)));
 
 [
   "profiles",
