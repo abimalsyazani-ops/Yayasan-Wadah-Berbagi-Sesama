@@ -15,6 +15,7 @@ const store = read("assets/data-store.js");
 const adminSw = read("admin-sw.js");
 const schema = read("supabase-schema.sql");
 const mediaStorage = read("supabase/media_storage_update.sql");
+const adminAccess = read("supabase/admin_access_hardening.sql");
 const robots = read("robots.txt");
 const sitemap = read("sitemap.xml");
 const isVerificationFile = (file) => /^google[a-z0-9]+\.html$/i.test(file);
@@ -24,6 +25,7 @@ const publicPages = fs.readdirSync(root).filter(file => file.endsWith(".html") &
 check("Admin session tidak memakai string active", !/sessionStorage\.(?:setItem|getItem)\(sessionKey,\s*['"]active['"]/.test(admin));
 check("Production login memakai Supabase password auth", admin.includes("signInWithPassword"));
 check("Production session memakai getSession", admin.includes("auth.getSession"));
+check("Admin production diverifikasi dari server dan allowlist", admin.includes("auth.getUser") && admin.includes("from('admin_users')") && admin.includes("Akun ini tidak memiliki akses sebagai admin WBS"));
 check("OAuth callback dipantau melalui onAuthStateChange", admin.includes("auth.onAuthStateChange") && admin.includes("INITIAL_SESSION") && admin.includes("SIGNED_IN"));
 check("Supabase client mendeteksi sesi dari URL", admin.includes("detectSessionInUrl:true") && admin.includes("persistSession:true"));
 check("Login Google memeriksa error OAuth", admin.includes("signInWithOAuth") && admin.includes("if(error)throw error"));
@@ -35,6 +37,9 @@ check("Mode produksi memakai cache memori", store.includes("runtimeRows") && sto
 check("Cache browser lama dibersihkan setelah sinkronisasi", store.includes("localStorage.removeItem(keys[type])") && store.includes("localStorage.removeItem(keys.audit_logs)"));
 check("Migrasi bucket media tersedia", mediaStorage.includes("website-media") && mediaStorage.includes("Authenticated upload website media"));
 check("Migrasi media memberi akses baca admin", mediaStorage.includes("Authenticated read website media"));
+check("Kebijakan Storage dibatasi ke admin terdaftar", adminAccess.includes('Admins upload website media') && adminAccess.includes('Admins delete website media') && adminAccess.includes('public.admin_users'));
+check("Dokumen lama tidak lagi dapat dibaca publik", adminAccess.includes('drop policy if exists "Public read documents"') && adminAccess.includes('revoke all on table public.documents from anon'));
+check("Tabel sensitif hanya dapat dikelola admin terdaftar", ['volunteers','book donations','donors','messages'].every(name => adminAccess.includes('Admins manage '+name)) && !adminAccess.includes('create policy "Authenticated manage donors"'));
 check("Logout memakai Supabase signOut", admin.includes("auth.signOut"));
 check("Tidak ada password demo hardcoded", !/password\s*[:=]\s*['"][^'"]{4,}['"]/i.test(admin + store));
 check("Validasi MIME upload admin tersedia", admin.includes("imageTypes") && admin.includes("documentTypes"));
