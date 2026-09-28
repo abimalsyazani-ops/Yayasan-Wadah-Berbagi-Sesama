@@ -47,6 +47,7 @@ check("Proteksi submit ganda admin tersedia", admin.includes("dataset.busy") && 
 check("Ekspor donatur aman formula injection", admin.includes("safeCsvCell") && admin.includes("/^[=+\\-@]/"));
 check("Campaign menghitung donasi tersimpan", app.includes("campaignStats") && app.includes("repo.list('donors')"));
 check("Donasi publik divalidasi", app.includes("validateDonation") && app.includes("Nominal donasi minimal"));
+check("Donasi umum tetap tersedia saat campaign kosong", app.includes("Donasi Umum Sekarang") && app.includes("openDonation('Donasi Umum WBS')"));
 check("Mode produksi Supabase aktif", store.includes("const APP_MODE='production'") && store.includes("APP_MODE==='production'"));
 check("Publishable key tidak dikirim sebagai Bearer JWT", store.includes("if(this.accessToken)headers.Authorization='Bearer '+this.accessToken") && !store.includes("this.accessToken||this.key"));
 check("Form publik memakai INSERT agar sesuai RLS", store.includes("isPublicInsert?'':'?on_conflict=id'") && store.includes("isPublicInsert?'return=minimal':'resolution=merge-duplicates,return=minimal'"));
