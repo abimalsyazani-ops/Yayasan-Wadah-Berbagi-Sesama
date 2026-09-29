@@ -1,19 +1,6 @@
 (function(){
   const seed={
-    programs:[
-      {id:'sosial-yatim',category:'sosial',title:'Santunan dan Pembinaan Anak Yatim',description:'Pendampingan rutin, santunan, dan pembinaan karakter bagi anak yatim.',image:'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=80'},
-      {id:'sosial-bencana',category:'sosial',title:'Tanggap Bencana',description:'Bantuan cepat untuk masyarakat terdampak bencana dan keadaan darurat.',image:'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&q=80'},
-      {id:'sosial-dhuafa',category:'sosial',title:'Pendampingan Keluarga Dhuafa',description:'Bantuan kebutuhan dasar dan pendampingan menuju kemandirian.',image:'https://images.unsplash.com/photo-1594708767771-a7502209ff51?w=800&q=80'},
-      {id:'pendidikan-beasiswa',category:'pendidikan',title:'Beasiswa Anak Yatim',description:'Dukungan biaya sekolah bagi anak yatim dan dhuafa berprestasi.',image:'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&q=80'},
-      {id:'pendidikan-tahfidz',category:'pendidikan',title:'Rumah Tahfidz Al-Qur\'an',description:'Pembinaan generasi penghafal Al-Qur\'an dengan kurikulum terarah.',image:'https://images.unsplash.com/photo-1609234656388-0ff363383899?w=800&q=80'},
-      {id:'pendidikan-belajar',category:'pendidikan',title:'Rumah Belajar WBS',description:'Ruang belajar gratis, literasi, dan pendampingan akademik.',image:'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80'},
-      {id:'kesehatan-gratis',category:'kesehatan',title:'Layanan Kesehatan Gratis',description:'Pemeriksaan dan pengobatan dasar bagi masyarakat prasejahtera.',image:'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80'},
-      {id:'kesehatan-pengobatan',category:'kesehatan',title:'Bantuan Biaya Pengobatan',description:'Dukungan pengobatan untuk pasien dhuafa dengan kondisi mendesak.',image:'https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?w=800&q=80'},
-      {id:'kesehatan-gizi',category:'kesehatan',title:'Gizi Ibu dan Anak',description:'Paket gizi dan edukasi kesehatan untuk keluarga rentan.',image:'https://images.unsplash.com/photo-1494390248081-4e521a5940db?w=800&q=80'},
-      {id:'pangan-sembako',category:'pangan',title:'Paket Sembako Dhuafa',description:'Distribusi pangan pokok rutin bagi keluarga prasejahtera.',image:'https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?w=800&q=80'},
-      {id:'pangan-jumat',category:'pangan',title:'Jumat Berbagi',description:'Makanan siap santap untuk yatim, pekerja informal, dan dhuafa.',image:'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&q=80'},
-      {id:'pangan-ramadhan',category:'pangan',title:'Pangan Ramadhan',description:'Paket sahur, berbuka, dan sembako selama bulan Ramadhan.',image:'https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80'}
-    ],
+    programs:[],
     campaigns:[],
     articles:[],
     gallery:[],

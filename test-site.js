@@ -16,6 +16,7 @@ const adminSw = read("admin-sw.js");
 const schema = read("supabase-schema.sql");
 const mediaStorage = read("supabase/media_storage_update.sql");
 const adminAccess = read("supabase/admin_access_hardening.sql");
+const prototypeCleanup = read("supabase/remove_prototype_content.sql");
 const robots = read("robots.txt");
 const sitemap = read("sitemap.xml");
 const isVerificationFile = (file) => /^google[a-z0-9]+\.html$/i.test(file);
@@ -48,6 +49,9 @@ check("Ekspor donatur aman formula injection", admin.includes("safeCsvCell") && 
 check("Campaign menghitung donasi tersimpan", app.includes("campaignStats") && app.includes("repo.list('donors')"));
 check("Donasi publik divalidasi", app.includes("validateDonation") && app.includes("Nominal donasi minimal"));
 check("Donasi umum tetap tersedia saat campaign kosong", app.includes("Donasi Umum Sekarang") && app.includes("openDonation('Donasi Umum WBS')"));
+check("Data program contoh tidak tertanam di website produksi", store.includes("programs:[]") && !store.includes("sosial-yatim"));
+check("Bagian foto prototype tidak ditampilkan ke publik", app.includes("removePrototypeSections") && app.includes("foto prototype"));
+check("Migrasi penghapusan data prototype tersedia", prototypeCleanup.includes("delete from public.programs") && prototypeCleanup.includes("delete from public.videos"));
 check("Mode produksi Supabase aktif", store.includes("const APP_MODE='production'") && store.includes("APP_MODE==='production'"));
 check("Publishable key tidak dikirim sebagai Bearer JWT", store.includes("if(this.accessToken)headers.Authorization='Bearer '+this.accessToken") && !store.includes("this.accessToken||this.key"));
 check("Form publik memakai INSERT agar sesuai RLS", store.includes("isPublicInsert?'':'?on_conflict=id'") && store.includes("isPublicInsert?'return=minimal':'resolution=merge-duplicates,return=minimal'"));
