@@ -11,6 +11,7 @@ function check(name, pass, note = "") {
 
 const admin = read("assets/admin.js");
 const app = read("assets/app.js");
+const styles = read("assets/styles.css");
 const store = read("assets/data-store.js");
 const adminSw = read("admin-sw.js");
 const schema = read("supabase-schema.sql");
@@ -50,6 +51,7 @@ check("Ekspor donatur aman formula injection", admin.includes("safeCsvCell") && 
 check("Campaign menghitung donasi tersimpan", app.includes("campaignStats") && app.includes("repo.list('donors')"));
 check("Donasi publik divalidasi", app.includes("validateDonation") && app.includes("Nominal donasi minimal"));
 check("Donasi umum tetap tersedia saat campaign kosong", app.includes("Donasi Umum Sekarang") && app.includes("openDonation('Donasi Umum WBS')"));
+check("Detail campaign tidak mengulang ringkasan narasi", styles.includes(".campaign-title-block [data-description]{display:none}") && !app.includes("Campaign resmi sedang disiapkan. Silakan kembali lagi setelah campaign dipublikasikan."));
 check("Data program contoh tidak tertanam di website produksi", store.includes("programs:[]") && !store.includes("sosial-yatim"));
 check("Bagian foto prototype tidak ditampilkan ke publik", app.includes("removePrototypeSections") && app.includes("foto prototype"));
 check("Migrasi penghapusan data prototype tersedia", prototypeCleanup.includes("delete from public.programs") && prototypeCleanup.includes("delete from public.videos"));

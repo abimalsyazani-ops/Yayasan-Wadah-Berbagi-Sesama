@@ -104,7 +104,6 @@
     if(!item){
       setText(root,'[data-title]','Campaign belum tersedia');
       setText(root,'[data-category]','WBS');
-      setText(root,'[data-description]','Campaign resmi sedang disiapkan. Silakan kembali lagi setelah campaign dipublikasikan.');
       setText(root,'[data-full-description]','Informasi campaign akan tampil di halaman ini setelah dipublikasikan oleh admin WBS.');
       setText(root,'[data-raised]',rupiah(0));
       setText(root,'[data-target]',rupiah(0));
@@ -124,7 +123,6 @@
     document.title=item.title+' | WBS';
     setText(root,'[data-title]',item.title);
     setText(root,'[data-category]',item.category);
-    setText(root,'[data-description]',item.description);
     setText(root,'[data-full-description]',item.description+' Program ini dikelola dengan verifikasi penerima manfaat, dokumentasi kegiatan, dan laporan penyaluran agar setiap amanah donatur dapat tersampaikan secara bertanggung jawab.');
     applyImage(root.querySelector('[data-image]'),item.image,item.title);
     setText(root,'[data-raised]',rupiah(displayStats.collected));
