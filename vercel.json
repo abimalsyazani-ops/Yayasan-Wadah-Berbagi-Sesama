@@ -1,0 +1,24 @@
+{
+  "redirects": [
+    {
+      "source": "/fokus-sosial.html",
+      "destination": "/donasi.html?program=sosial",
+      "permanent": true
+    },
+    {
+      "source": "/fokus-pendidikan.html",
+      "destination": "/donasi.html?category=pendidikan",
+      "permanent": true
+    },
+    {
+      "source": "/fokus-kesehatan.html",
+      "destination": "/donasi.html?category=kesehatan",
+      "permanent": true
+    },
+    {
+      "source": "/fokus-pangan.html",
+      "destination": "/donasi.html?category=pangan",
+      "permanent": true
+    }
+  ]
+}

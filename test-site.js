@@ -21,6 +21,7 @@ const prototypeCleanup = read("supabase/remove_prototype_content.sql");
 const galleryMultiImage = read("supabase/gallery_multi_image_update.sql");
 const robots = read("robots.txt");
 const sitemap = read("sitemap.xml");
+const redirects = JSON.parse(read("vercel.json"));
 const isVerificationFile = (file) => /^google[a-z0-9]+\.html$/i.test(file);
 const appPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && file !== "download.html" && !isVerificationFile(file)).map(read);
 const publicPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && !["admin.html", "download.html"].includes(file) && !isVerificationFile(file)).map(read);
@@ -52,6 +53,8 @@ check("Campaign menghitung donasi tersimpan", app.includes("campaignStats") && a
 check("Donasi publik divalidasi", app.includes("validateDonation") && app.includes("Nominal donasi minimal"));
 check("Donasi umum tetap tersedia saat campaign kosong", app.includes("Donasi Umum Sekarang") && app.includes("openDonation('Donasi Umum WBS')"));
 check("Detail campaign tidak mengulang ringkasan narasi", styles.includes(".campaign-title-block [data-description]{display:none}") && !app.includes("Campaign resmi sedang disiapkan. Silakan kembali lagi setelah campaign dipublikasikan."));
+check("Kartu fokus langsung menuju halaman donasi", ["sosial", "pendidikan", "kesehatan", "pangan"].every(category => !read("fokus.html").includes(`fokus-${category}.html`)) && read("fokus.html").includes("Dukung Program"));
+check("Halaman fokus kategori lama dialihkan ke donasi", redirects.redirects.length === 4 && redirects.redirects.every(item => item.destination.startsWith("/donasi.html")));
 check("Data program contoh tidak tertanam di website produksi", store.includes("programs:[]") && !store.includes("sosial-yatim"));
 check("Bagian foto prototype tidak ditampilkan ke publik", app.includes("removePrototypeSections") && app.includes("foto prototype"));
 check("Migrasi penghapusan data prototype tersedia", prototypeCleanup.includes("delete from public.programs") && prototypeCleanup.includes("delete from public.videos"));

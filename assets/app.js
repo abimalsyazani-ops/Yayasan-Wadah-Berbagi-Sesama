@@ -173,7 +173,7 @@
     const support=root.querySelector('[data-support]'),back=root.querySelector('[data-back-category]');
     support.href='donasi.html?program='+encodeURIComponent(item.category);
     support.textContent='Dukung Program Ini';
-    back.href='fokus-'+item.category+'.html';
+    back.href='fokus.html';
     back.textContent='Kembali ke Fokus '+categoryLabel(item.category);
   }
   function renderArticleDetail(){
