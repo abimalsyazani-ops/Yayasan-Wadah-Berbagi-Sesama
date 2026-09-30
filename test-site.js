@@ -17,6 +17,7 @@ const schema = read("supabase-schema.sql");
 const mediaStorage = read("supabase/media_storage_update.sql");
 const adminAccess = read("supabase/admin_access_hardening.sql");
 const prototypeCleanup = read("supabase/remove_prototype_content.sql");
+const galleryMultiImage = read("supabase/gallery_multi_image_update.sql");
 const robots = read("robots.txt");
 const sitemap = read("sitemap.xml");
 const isVerificationFile = (file) => /^google[a-z0-9]+\.html$/i.test(file);
@@ -52,6 +53,7 @@ check("Donasi umum tetap tersedia saat campaign kosong", app.includes("Donasi Um
 check("Data program contoh tidak tertanam di website produksi", store.includes("programs:[]") && !store.includes("sosial-yatim"));
 check("Bagian foto prototype tidak ditampilkan ke publik", app.includes("removePrototypeSections") && app.includes("foto prototype"));
 check("Migrasi penghapusan data prototype tersedia", prototypeCleanup.includes("delete from public.programs") && prototypeCleanup.includes("delete from public.videos"));
+check("Migrasi album galeri multi-foto tersedia", galleryMultiImage.includes("add column if not exists images jsonb") && galleryMultiImage.includes("notify pgrst, 'reload schema'"));
 check("Mode produksi Supabase aktif", store.includes("const APP_MODE='production'") && store.includes("APP_MODE==='production'"));
 check("Publishable key tidak dikirim sebagai Bearer JWT", store.includes("if(this.accessToken)headers.Authorization='Bearer '+this.accessToken") && !store.includes("this.accessToken||this.key"));
 check("Form publik memakai INSERT agar sesuai RLS", store.includes("isPublicInsert?'':'?on_conflict=id'") && store.includes("isPublicInsert?'return=minimal':'resolution=merge-duplicates,return=minimal'"));
