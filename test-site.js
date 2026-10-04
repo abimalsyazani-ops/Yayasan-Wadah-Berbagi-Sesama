@@ -58,6 +58,7 @@ check("Donasi publik divalidasi", app.includes("validateDonation") && app.includ
 check("Donasi umum tetap tersedia saat campaign kosong", app.includes("Donasi Umum Sekarang") && app.includes("openDonation('Donasi Umum WBS')"));
 check("Detail campaign tidak mengulang ringkasan narasi", styles.includes(".campaign-title-block [data-description]{display:none}") && !app.includes("Campaign resmi sedang disiapkan. Silakan kembali lagi setelah campaign dipublikasikan."));
 check("Kartu fokus langsung menuju halaman donasi", ["sosial", "pendidikan", "kesehatan", "pangan"].every(category => !read("fokus.html").includes(`fokus-${category}.html`)) && read("fokus.html").includes("Dukung Program"));
+check("Kartu fokus memakai gambar program lokal", ["sosial", "pendidikan", "kesehatan", "pangan"].every(category => read("fokus.html").includes(`assets/fokus-${category}.webp`)) && !read("fokus.html").includes("images.unsplash.com"));
 check("Halaman fokus kategori lama dialihkan ke donasi", redirects.redirects.length === 4 && redirects.redirects.every(item => item.destination.startsWith("/donasi.html")));
 check("Data program contoh tidak tertanam di website produksi", store.includes("programs:[]") && !store.includes("sosial-yatim"));
 check("Bagian foto prototype tidak ditampilkan ke publik", app.includes("removePrototypeSections") && app.includes("foto prototype"));
