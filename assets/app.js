@@ -12,9 +12,10 @@
   const cleanText=(value,max=500)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
   const normalizePhone=value=>String(value??'').replace(/[^\d+]/g,'').trim();
   const parseAmount=value=>Number(String(value??'').replace(/[^\d]/g,''));
-  const activeDonationStatuses=new Set(['Menunggu Konfirmasi','pending_verification','need_review','verified','approved','posted']);
+  const normalizeCampaign=value=>cleanText(value,240).normalize('NFKC').replace(/[\u2018\u2019\u02bc]/g,"'").toLocaleLowerCase('id-ID');
+  const donorRows=item=>repo.list('donation_activity').filter(entry=>normalizeCampaign(entry.campaign)===normalizeCampaign(item.title));
   const campaignStats=item=>{
-    const donors=repo.list('donors').filter(entry=>entry.campaign===item.title&&activeDonationStatuses.has(entry.status||'Menunggu Konfirmasi'));
+    const donors=donorRows(item);
     const donorAmount=donors.reduce((sum,entry)=>sum+Number(entry.amount||0),0);
     const collected=Number(item.collected||0)+donorAmount;
     const target=Number(item.target||0);
@@ -91,7 +92,6 @@
 
   function renderDocuments(){document.querySelectorAll('[data-document-list]').forEach(grid=>{grid.textContent='';repo.list('documents').forEach(item=>{const card=node('article','document-card reveal');card.append(node('span','tag',item.category),node('h3','',item.title),node('p','',item.period));const link=node('a','card-link',item.fileData?'Unduh Dokumen':'Minta Dokumen ->');link.href=item.fileData||item.url||'#';if(item.fileData){link.download=item.fileName||'dokumen-wbs'}card.append(link);grid.append(card)});setupReveal()})}
 
-  function donorRows(item){return repo.list('donors').filter(entry=>entry.campaign===item.title&&activeDonationStatuses.has(entry.status||'Menunggu Konfirmasi'))}
   function donorDisplayName(entry){return entry.anonymous?'Hamba Allah':cleanText(entry.publicName||((entry.salutation?entry.salutation+' ':'')+(entry.name||'Donatur')).trim(),80)||'Donatur WBS'}
   function donorAvatar(entry){const avatar=node('div','donor-avatar');avatar.textContent=entry.anonymous?'WB':donorDisplayName(entry).split(' ').map(part=>part[0]).join('').slice(0,2).toUpperCase();return avatar}
   function donorItem(entry){const card=node('article','donor-item');card.append(donorAvatar(entry));const body=node('div');body.append(node('strong','',donorDisplayName(entry)),node('p','',`Berdonasi sebesar ${rupiah(entry.amount)}`),node('span','',relativeTime(entry.createdAt)));card.append(body);return card}

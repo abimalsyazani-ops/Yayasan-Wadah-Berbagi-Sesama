@@ -6,13 +6,13 @@
     gallery:[],
     videos:[],
     documents:[],
-    volunteers:[],book_donations:[],donors:[],messages:[]
+    volunteers:[],book_donations:[],donors:[],donation_activity:[],messages:[]
   };
 
   // Mode demo aman untuk uji tampilan/fungsi lokal, tetapi bukan bukti keamanan produksi.
   // Ganti ke "production" setelah Supabase Auth, Database, Storage, dan RLS sudah dikonfigurasi.
   const APP_MODE='production';
-  const keys={programs:'wbs_programs_v2',campaigns:'wbs_campaigns_v2',articles:'wbs_articles_v2',documents:'wbs_documents_v2',gallery:'wbs_gallery_v2',videos:'wbs_videos_v2',volunteers:'wbs_volunteers_v2',book_donations:'wbs_book_donations_v2',donors:'wbs_donors_v2',messages:'wbs_messages_v2',audit_logs:'wbs_audit_logs_v2'};
+  const keys={programs:'wbs_programs_v2',campaigns:'wbs_campaigns_v2',articles:'wbs_articles_v2',documents:'wbs_documents_v2',gallery:'wbs_gallery_v2',videos:'wbs_videos_v2',volunteers:'wbs_volunteers_v2',book_donations:'wbs_book_donations_v2',donors:'wbs_donors_v2',donation_activity:'wbs_donation_activity_v1',messages:'wbs_messages_v2',audit_logs:'wbs_audit_logs_v2'};
   const retiredSeedIds={
     campaigns:new Set(['zakat-maal','sedekah-yatim','wakaf-quran','beasiswa-yatim','pangan-lansia','pengobatan-dhuafa']),
     articles:new Set(['pangan-ramadhan-2026','keutamaan-sedekah','wakaf-produktif','adab-memberi']),
@@ -20,7 +20,7 @@
     videos:new Set(['vid-1','vid-2','vid-3']),
     documents:new Set(['doc-kegiatan','doc-penyaluran','doc-dokumentasi','doc-keuangan','doc-tahunan','doc-legal'])
   };
-  const syncTables=['programs','campaigns','articles','documents','gallery','videos','volunteers','book_donations','donors','messages'];
+  const syncTables=['programs','campaigns','articles','documents','gallery','videos','volunteers','book_donations','donors','donation_activity','messages'];
   const runtimeRows=Object.fromEntries(syncTables.map(type=>[type,[]]));
   const supabaseConfig={url:'https://tnwnmotbjhdefkzsdpuj.supabase.co',key:'sb_publishable_i3e7OtL5w0cMANlQJ1xSXw_jG6laci0',tables:syncTables};
   const notifySync=type=>window.dispatchEvent(new CustomEvent('wbs:data-sync',{detail:{type}}));
