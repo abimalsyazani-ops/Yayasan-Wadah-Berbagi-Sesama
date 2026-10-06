@@ -1,11 +1,11 @@
-const CACHE_NAME = 'wbs-admin-pwa-v17';
+const CACHE_NAME = 'wbs-admin-pwa-v18';
 const ADMIN_ASSETS = [
   './admin.html',
   './admin.webmanifest',
-  './assets/styles.css',
-  './assets/data-store.js?v=20260924-2',
-  './assets/app.js?v=20260923-3',
-  './assets/admin.js',
+  './assets/styles.css?v=20261006-1',
+  './assets/data-store.js?v=20261005-1',
+  './assets/app.js?v=20261006-1',
+  './assets/admin.js?v=20261006-1',
   './assets/wbs-logo.png',
   './assets/wbs-admin-icon-192.png',
   './assets/wbs-admin-icon-512.png'

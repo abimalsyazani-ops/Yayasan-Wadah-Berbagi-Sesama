@@ -3,7 +3,7 @@
 -- It creates website data tables, enables RLS, and grants Data API access.
 
 create table if not exists public.programs (id text primary key, category text not null, title text not null, description text, image text, "createdAt" timestamptz default now());
-create table if not exists public.campaigns (id text primary key, category text not null, title text not null, description text, collected numeric default 0, target numeric default 0, deadline date, image text, featured boolean default false, "createdAt" timestamptz default now());
+create table if not exists public.campaigns (id text primary key, category text not null, title text not null, description text, collected numeric default 0, target numeric default 0, deadline date, image text, "narrativeImages" jsonb not null default '[]'::jsonb, featured boolean default false, "createdAt" timestamptz default now());
 create table if not exists public.articles (id text primary key, category text not null, title text not null, date date, excerpt text, image text, content text, "createdAt" timestamptz default now());
 create table if not exists public.gallery (id text primary key, title text not null, category text, date date, image text, images jsonb default '[]'::jsonb, "createdAt" timestamptz default now());
 create table if not exists public.videos (id text primary key, title text not null, category text, date date, url text not null, thumbnail text, "createdAt" timestamptz default now());
@@ -16,6 +16,9 @@ create table if not exists public.messages (id text primary key, name text, emai
 alter table public.gallery add column if not exists images jsonb default '[]'::jsonb;
 alter table public.programs add column if not exists "updatedAt" timestamptz;
 alter table public.campaigns add column if not exists "updatedAt" timestamptz;
+alter table public.campaigns add column if not exists "narrativeImages" jsonb not null default '[]'::jsonb;
+alter table public.campaigns drop constraint if exists campaigns_narrative_images_count;
+alter table public.campaigns add constraint campaigns_narrative_images_count check (jsonb_typeof("narrativeImages") = 'array' and jsonb_array_length("narrativeImages") <= 2);
 alter table public.articles add column if not exists "updatedAt" timestamptz;
 alter table public.gallery add column if not exists "updatedAt" timestamptz;
 alter table public.videos add column if not exists "updatedAt" timestamptz;

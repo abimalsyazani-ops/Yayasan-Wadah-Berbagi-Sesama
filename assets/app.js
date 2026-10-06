@@ -96,6 +96,8 @@
   function donorAvatar(entry){const avatar=node('div','donor-avatar');avatar.textContent=entry.anonymous?'WB':donorDisplayName(entry).split(' ').map(part=>part[0]).join('').slice(0,2).toUpperCase();return avatar}
   function donorItem(entry){const card=node('article','donor-item');card.append(donorAvatar(entry));const body=node('div');body.append(node('strong','',donorDisplayName(entry)),node('p','',`Berdonasi sebesar ${rupiah(entry.amount)}`),node('span','',relativeTime(entry.createdAt)));card.append(body);return card}
   function prayerItem(entry){const card=node('article','prayer-card');const head=node('div','prayer-head');head.append(donorAvatar(entry));const info=node('div');info.append(node('strong','',donorDisplayName(entry)),node('span','',relativeTime(entry.createdAt)));head.append(info);card.append(head,node('p','',entry.prayer),node('div','prayer-actions','Aamiin  ·  Bagikan doa'));return card}
+  function campaignNarrativeImages(item){if(Array.isArray(item?.narrativeImages))return item.narrativeImages.filter(value=>typeof value==='string'&&value.trim()).slice(0,2);if(typeof item?.narrativeImages==='string'){try{const parsed=JSON.parse(item.narrativeImages);return Array.isArray(parsed)?parsed.filter(value=>typeof value==='string'&&value.trim()).slice(0,2):[]}catch{return[]}}return[]}
+  function renderCampaignNarrativeImages(root,item){const container=root.querySelector('[data-narrative-images]');if(!container)return;const images=campaignNarrativeImages(item);container.replaceChildren(...images.map((src,index)=>image(src,`${item.title} - foto pendukung ${index+1}`)));container.classList.toggle('hidden',images.length===0)}
   function renderCampaignDetail(){
     const root=document.querySelector('[data-campaign-detail]');
     if(!root)return;
@@ -112,6 +114,7 @@
       setText(root,'[data-progress-label]','0% tercapai');
       setText(root,'[data-donor-count]','0');
       setText(root,'[data-prayer-count]','0');
+      renderCampaignNarrativeImages(root,{title:'Campaign WBS',narrativeImages:[]});
       root.querySelectorAll('[data-progress]').forEach(element=>{element.style.width='0%'});
       donorList.replaceChildren(node('div','campaign-empty','Belum ada data donatur untuk ditampilkan.'));
       prayerList.replaceChildren(node('div','campaign-empty','Belum ada doa donatur untuk ditampilkan.'));
@@ -124,6 +127,7 @@
     setText(root,'[data-title]',item.title);
     setText(root,'[data-category]',item.category);
     setText(root,'[data-full-description]',item.description+' Program ini dikelola dengan verifikasi penerima manfaat, dokumentasi kegiatan, dan laporan penyaluran agar setiap amanah donatur dapat tersampaikan secara bertanggung jawab.');
+    renderCampaignNarrativeImages(root,item);
     applyImage(root.querySelector('[data-image]'),item.image,item.title);
     setText(root,'[data-raised]',rupiah(displayStats.collected));
     setText(root,'[data-target]',rupiah(displayStats.target));
