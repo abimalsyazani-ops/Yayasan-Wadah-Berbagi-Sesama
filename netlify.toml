@@ -1,0 +1,36 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/fokus-sosial.html"
+  to = "/donasi.html?program=sosial"
+  status = 301
+
+[[redirects]]
+  from = "/fokus-pendidikan.html"
+  to = "/donasi.html?category=pendidikan"
+  status = 301
+
+[[redirects]]
+  from = "/fokus-kesehatan.html"
+  to = "/donasi.html?category=kesehatan"
+  status = 301
+
+[[redirects]]
+  from = "/fokus-pangan.html"
+  to = "/donasi.html?category=pangan"
+  status = 301
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/admin-sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+

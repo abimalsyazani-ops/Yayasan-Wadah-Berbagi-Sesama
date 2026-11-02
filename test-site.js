@@ -24,6 +24,7 @@ const campaignNarrativeImages = read("supabase/campaign_narrative_images.sql");
 const robots = read("robots.txt");
 const sitemap = read("sitemap.xml");
 const redirects = JSON.parse(read("vercel.json"));
+const netlifyConfig = read("netlify.toml");
 const isVerificationFile = (file) => /^google[a-z0-9]+\.html$/i.test(file);
 const appPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && file !== "download.html" && !isVerificationFile(file)).map(read);
 const publicPages = fs.readdirSync(root).filter(file => file.endsWith(".html") && !["admin.html", "download.html"].includes(file) && !isVerificationFile(file)).map(read);
@@ -62,6 +63,9 @@ check("Kartu fokus langsung menuju halaman donasi", ["sosial", "pendidikan", "ke
 check("Kartu fokus memakai gambar program lokal", ["sosial", "pendidikan", "kesehatan", "pangan"].every(category => read("fokus.html").includes(`assets/fokus-${category}.webp`)) && !read("fokus.html").includes("images.unsplash.com"));
 check("Beranda memakai gambar Fokus Program lokal", ["sosial", "pendidikan", "kesehatan", "pangan"].every(category => read("index.html").includes(`assets/fokus-${category}.webp`)) && !read("index.html").includes("images.unsplash.com"));
 check("Halaman fokus kategori lama dialihkan ke donasi", redirects.redirects.length === 4 && redirects.redirects.every(item => item.destination.startsWith("/donasi.html")));
+check("Konfigurasi Netlify menerbitkan website dari root", netlifyConfig.includes('publish = "."'));
+check("Redirect Netlify setara dengan Vercel", redirects.redirects.every(item => netlifyConfig.includes(`from = "${item.source}"`) && netlifyConfig.includes(`to = "${item.destination}"`)));
+check("PWA admin tidak tertahan cache lama di Netlify", netlifyConfig.includes('for = "/admin-sw.js"') && netlifyConfig.includes('max-age=0, must-revalidate'));
 check("Data program contoh tidak tertanam di website produksi", store.includes("programs:[]") && !store.includes("sosial-yatim"));
 check("Bagian foto prototype tidak ditampilkan ke publik", app.includes("removePrototypeSections") && app.includes("foto prototype"));
 check("Migrasi penghapusan data prototype tersedia", prototypeCleanup.includes("delete from public.programs") && prototypeCleanup.includes("delete from public.videos"));
